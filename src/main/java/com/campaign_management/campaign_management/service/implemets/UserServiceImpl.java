@@ -81,14 +81,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String checkEmailVerification(String code) {
+    public String checkEmailVerification(String code) throws JSONException {
         User res_data = userRepository.findByVerificationCode(code);
         if (res_data != null) {
             res_data.setEnabled(true);
             userRepository.save(res_data);
-            return "verified";
+            return returnJsonString(true,"verified");
         }
-        return "Not verified sorry!!";
+        return returnJsonString(false,"Not verified sorry!!");
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(res_data);
         sendForgotPasswordEmail(email, otp);
 
-        return "OTP send !!";
+        return returnJsonString(true,"OTP send !!");
     }
 
     @Override
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(res_data);
 
-        return "Otp verified successfully!!";
+        return returnJsonString(true,"Otp verified successfully!!");
     }
 
     @Override
@@ -133,7 +133,7 @@ public class UserServiceImpl implements UserService {
         res_data.setPassword(data.getNewPassword());
         userRepository.save(res_data);
 
-        return "password changed successfully!!";
+        return returnJsonString(true,"password changed successfully!!");
     }
 
     // Helper functions
@@ -208,5 +208,14 @@ public class UserServiceImpl implements UserService {
         }
         return;
     }
+    
+    public String returnJsonString(boolean status,String response) throws JSONException{
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", status);
+        jsonObject.put("message", response);
+        return jsonObject.toString();
+    }
 
 }
+
+

@@ -7,6 +7,8 @@ import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
 import com.campaign_management.campaign_management.model.User;
 
+import org.codehaus.jettison.json.JSONException;
+
 
 public interface UserService {
 
@@ -20,7 +22,7 @@ public interface UserService {
 
     String deleteData(int id);
     
-    String checkEmailVerification(String code);
+    String checkEmailVerification(String code) throws JSONException;
 
     String forgotPassword(ForgotPassword data) throws Exception;
 

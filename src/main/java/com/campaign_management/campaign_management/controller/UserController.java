@@ -130,7 +130,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/verify")
-    public ResponseEntity<String> verifyMail(@Param("code") String code) {
+    public ResponseEntity<String> verifyMail(@Param("code") String code) throws JSONException {
         return new ResponseEntity<>(userService.checkEmailVerification(code), HttpStatus.OK);
     }
 
