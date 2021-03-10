@@ -2,10 +2,8 @@ package com.campaign_management.campaign_management.service.implemets;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import com.campaign_management.campaign_management.model.User;
 import com.campaign_management.campaign_management.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;

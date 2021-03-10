@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
     // call from controller for signup Email verification
     public void sendVerificationEmail(User user, String siteURL) throws Exception {
         String toAddress = user.getEmail();
-        String fromAddress = "rahulkrishnanr081@gmail.com";
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
         String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
@@ -167,7 +167,7 @@ public class UserServiceImpl implements UserService {
 
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
-        String fromAddress = "rahulkrishnanr081@gmail.com";
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
