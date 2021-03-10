@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
             String code = generateVerficationCode();
             user.setVerificationCode(code);
             user.setEnabled(false);
+            user.setMbverify(false);
             return userRepository.save(user);
         }
 
@@ -58,10 +59,13 @@ public class UserServiceImpl implements UserService {
         User exist = userRepository.findById(id).orElse(null);
         if (exist != null) {
             exist.setName(user.getName());
-            exist.setEmail(user.getEmail());
-            exist.setPassword(user.getPassword());
             exist.setPhone(user.getPhone());
             exist.setRole(user.getRole());
+            exist.setDOB(user.getDOB());
+            exist.setGender(user.getGender());
+            exist.setPassword(exist.getPassword());
+            
+
             userRepository.save(exist);
         }
         return exist;
@@ -86,9 +90,9 @@ public class UserServiceImpl implements UserService {
         if (res_data != null) {
             res_data.setEnabled(true);
             userRepository.save(res_data);
-            return returnJsonString(true,"verified");
+            return returnJsonString(true, "verified");
         }
-        return returnJsonString(false,"Not verified sorry!!");
+        return returnJsonString(false, "Not verified sorry!!");
     }
 
     @Override
@@ -105,7 +109,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(res_data);
         sendForgotPasswordEmail(email, otp);
 
-        return returnJsonString(true,"OTP send !!");
+        return returnJsonString(true, "OTP send !!");
     }
 
     @Override
@@ -120,7 +124,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(res_data);
 
-        return returnJsonString(true,"Otp verified successfully!!");
+        return returnJsonString(true, "Otp verified successfully!!");
     }
 
     @Override
@@ -133,7 +137,7 @@ public class UserServiceImpl implements UserService {
         res_data.setPassword(data.getNewPassword());
         userRepository.save(res_data);
 
-        return returnJsonString(true,"password changed successfully!!");
+        return returnJsonString(true, "password changed successfully!!");
     }
 
     // Helper functions
@@ -208,8 +212,8 @@ public class UserServiceImpl implements UserService {
         }
         return;
     }
-    
-    public String returnJsonString(boolean status,String response) throws JSONException{
+
+    public String returnJsonString(boolean status, String response) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", status);
         jsonObject.put("message", response);
@@ -217,5 +221,3 @@ public class UserServiceImpl implements UserService {
     }
 
 }
-
-

@@ -75,10 +75,14 @@ public class UserController {
             String email = user.getEmail();
 
             User user_data = userRepository.findByEmail(email);
+            jsonObject.put("id", user_data.getId());
             jsonObject.put("name", user_data.getName());
             jsonObject.put("email", user_data.getEmail());
-            jsonObject.put("phoneNumber", user_data.getPhone());
+            jsonObject.put("phone", user_data.getPhone());
             jsonObject.put("role", user_data.getRole());
+            jsonObject.put("mbverify", user_data.getMbVerify());
+            jsonObject.put("dob", user_data.getDOB());
+            jsonObject.put("gender", user_data.getGender());
             jsonObject.put("token", tokenProvider.createToken(email, user_data.getRole()));
 
         } catch (JSONException e) {
