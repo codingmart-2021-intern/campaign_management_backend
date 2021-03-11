@@ -204,7 +204,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    private void verifyOtpValidation(Long timestamp) throws Exception {
+    public void verifyOtpValidation(Long timestamp) throws Exception {
 
         Long minutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - timestamp);
         if (minutes > 3) {

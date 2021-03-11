@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
      @Query("FROM User WHERE otp=:otp")
      User findByOtp(String otp);
+
+     @Query("FROM User WHERE phone=:phone")
+     User findByPhoneNumber(Long phone);
 }
