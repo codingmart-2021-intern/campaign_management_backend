@@ -2,7 +2,8 @@ package com.campaign_management.campaign_management.controller;
 
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
-import com.campaign_management.campaign_management.config.JwtTokenProvider;
+
+import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
