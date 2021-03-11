@@ -1,13 +1,19 @@
 package com.campaign_management.campaign_management.config.SMS;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class TwilioConfiguration {
 
-    public String account_sid = "ACeb9125e5ada047b4dffd567708efcd94";
-    public String auth_token = "8ee1dfc725a9b2fcf2db3307df84ba06";
-    public String trail_number = "+14242066397";
+    @Value("${twilo-account_sid}")
+    public String account_sid;
+
+    @Value("${twilo-auth_token}")
+    public String auth_token;
+
+    @Value("${twilo-trail_number}")
+    public String trail_number;
 
     public String getAccountSid() {
         return account_sid;

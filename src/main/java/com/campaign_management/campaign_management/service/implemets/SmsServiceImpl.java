@@ -58,12 +58,12 @@ public class SmsServiceImpl implements SmsService {
 
         User res_data = userRepository.findByOtp(request.getOtp());
         if (res_data == null || !request.getOtp().equals(res_data.getOtp())) {
-            throw new Exception("Enter the Otp wrong!!");
+            throw new Exception("Entered Otp was wrong!!");
         }
         userServiceImpl.verifyOtpValidation(res_data.getTimestamp());
         res_data.setMbverify(true);
         userRepository.save(res_data);
-        return userServiceImpl.returnJsonString(true, "your Mobile Number registered successfully!!");
+        return userServiceImpl.returnJsonString(true, "your Mobile Number verified successfully!!");
     }
 
 }
