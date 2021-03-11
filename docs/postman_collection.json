@@ -13,7 +13,7 @@
                 "header": [],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"email\":\"rahulkrishnanr016@gmail.com\",\n    \"password\":\"test\"\n}",
+                    "raw": "{\n    \"email\":\"rahulkrishnanr016@gmail.com\",\n    \"password\":\"Rahul@123\"\n}",
                     "options": {
                         "raw": {
                             "language": "json"
@@ -89,11 +89,11 @@
                     },
                     {
                         "key": "Authorization",
-                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QGFkbWluLmNvbSIsImF1dGgiOiJhZG1pbiIsImlhdCI6MTYxNTI0NjI3NywiZXhwIjoxNjE1NDYyMjc3fQ.kxV1xEdVhfNv-tg84y3tfZuWL_6BEZX5n58kC7NklJ8",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWh1bGtyaXNobmFucjAxNkBnbWFpbC5jb20iLCJhdXRoIjoidXNlciIsImlhdCI6MTYxNTQwMDQ3MCwiZXhwIjoxNjE1NjE2NDcwfQ.2Vn7JAfEs_bGKfqSGAshIe9Hajvrs9HX24SneT7aIYw",
                         "type": "text"
                     }
                 ],
-                "url": "http:\/\/localhost:3001\/rest\/api\/v1\/user\/1"
+                "url": "http:\/\/localhost:3001\/rest\/api\/v1\/user\/12"
             },
             "response": []
         },
@@ -197,7 +197,7 @@
                 "header": [],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"password\":\"123456\",\n    \"otp\":\"17711\"\n}",
+                    "raw": "{\n    \"password\":\"test123\",\n    \"otp\":\"17917\"\n}",
                     "options": {
                         "raw": {
                             "language": "json"
@@ -221,13 +221,13 @@
                     },
                     {
                         "key": "Authorization",
-                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWh1bGtyaXNobmFucjAxNkBnbWFpbC5jb20iLCJhdXRoIjoidXNlciIsImlhdCI6MTYxNTMxMDYyMywiZXhwIjoxNjE1NTI2NjIzfQ.bGIunxEvk2XfPI7eL2CrD8JmYVEMfnv4kMHx8pVQ3Kw",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWh1bGtyaXNobmFucjAxNkBnbWFpbC5jb20iLCJhdXRoIjoidXNlciIsImlhdCI6MTYxNTM4MjIzNywiZXhwIjoxNjE1NTk4MjM3fQ.TlpLb4T57a2i-SnqHbBa6TOTyeW04U0bmAktUgjeAMI",
                         "type": "text"
                     }
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"email\":\"rahulkrishnanr016@gmail.com\",\n    \"oldPassword\":\"12345\",\n    \"newPassword\":\"test\"\n}",
+                    "raw": "{\n    \"email\":\"rahulkrishnanr016@gmail.com\",\n    \"oldPassword\":\"test123\",\n    \"newPassword\":\"test\"\n}",
                     "options": {
                         "raw": {
                             "language": "json"
@@ -235,6 +235,61 @@
                     }
                 },
                 "url": "http:\/\/localhost:3001\/rest\/api\/v1\/user\/newpassword"
+            },
+            "response": []
+        },
+        {
+            "name": "send sms",
+            "id": "f60c08ac-1daa-4e3f-9db8-899cc50c8a16",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application\/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWh1bGtyaXNobmFucjAxNkBnbWFpbC5jb20iLCJhdXRoIjoidXNlciIsImlhdCI6MTYxNTQ0NDg1OCwiZXhwIjoxNjE1NjYwODU4fQ.KB3R5LU-I0vD6sZsABcdU86X350u_KkVrT7z7QH6IoE",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"message\":\"hello rahul\",\n    \"phoneNumber\":\"+917397570896\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": "http:\/\/localhost:3001\/rest\/api\/v1\/sms\/generateOtp"
+            },
+            "response": []
+        },
+        {
+            "name": "verifyphonenumberOtp",
+            "id": "6d71bafc-e49f-4fd2-a9a8-d7ed00777f8e",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application\/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWh1bGtyaXNobmFucjAxNkBnbWFpbC5jb20iLCJhdXRoIjoidXNlciIsImlhdCI6MTYxNTQ0OTAxOCwiZXhwIjoxNjE1NjY1MDE4fQ.GY1eG-gZafvVD81prYk2xXzjcdqKxCxvvNiNkh9Gvp8",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"otp\":\"18176\"\n}"
+                },
+                "url": "http:\/\/localhost:3001\/rest\/api\/v1\/sms\/verifyPhoneNumber"
             },
             "response": []
         }
