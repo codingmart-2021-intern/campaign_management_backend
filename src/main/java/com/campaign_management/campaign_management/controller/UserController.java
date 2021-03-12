@@ -153,11 +153,12 @@ public class UserController {
     // Change User Details by admin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> updateData(@RequestBody User user, HttpServletRequest request) throws Exception {
+    public String updateData(@RequestBody List<User> users, HttpServletRequest request) throws Exception {
 
-        User responseData = userRepository.save(user);
+        users.forEach((user) -> userRepository.save(user));
+        // User responseData = userRepository.save(user);
 
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
+        return "{'message': 'User role Updated'}";
     }
 
     @GetMapping("/admin")
