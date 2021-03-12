@@ -58,13 +58,13 @@ public class UserServiceImpl implements UserService {
     public User updateData(User user, int id) {
         User exist = userRepository.findById(id).orElse(null);
         if (exist != null) {
+            exist.setImage(user.getImage());
             exist.setName(user.getName());
             exist.setPhone(user.getPhone());
             exist.setRole(user.getRole());
             exist.setDOB(user.getDOB());
             exist.setGender(user.getGender());
             exist.setPassword(exist.getPassword());
-            
 
             userRepository.save(exist);
         }

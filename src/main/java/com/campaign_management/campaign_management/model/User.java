@@ -15,6 +15,7 @@ public class User {
 	@GeneratedValue
 	public int id;
 
+	public String image;
 	public String name;
 	public String email;
 	public Long phone;
@@ -28,7 +29,6 @@ public class User {
 	public String verificationCode;
 	public boolean mbverify;
 	public String gender;
-
 	public String otp;
 	public Long timestamp;
 
@@ -40,6 +40,14 @@ public class User {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image_url) {
+		this.image = image_url;
 	}
 
 	public void setName(String name) {

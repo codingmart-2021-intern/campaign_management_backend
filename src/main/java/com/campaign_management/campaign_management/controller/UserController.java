@@ -2,7 +2,6 @@ package com.campaign_management.campaign_management.controller;
 
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
-
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
@@ -77,6 +76,7 @@ public class UserController {
 
             User user_data = userRepository.findByEmail(email);
             jsonObject.put("id", user_data.getId());
+            jsonObject.put("image_url", user_data.getImage());
             jsonObject.put("name", user_data.getName());
             jsonObject.put("email", user_data.getEmail());
             jsonObject.put("phone", user_data.getPhone());

@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/sms")
 public class SmsController {
@@ -22,6 +24,7 @@ public class SmsController {
 
     @PostMapping(value = "/generateOtp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> sendSms(@RequestBody SmsModel data) throws JSONException {
+        System.out.println("-----------NUMBER------------------------------"+data.getPhoneNumber());
         return new ResponseEntity<>(smsService.sendSms(data), HttpStatus.OK);
     }
 
