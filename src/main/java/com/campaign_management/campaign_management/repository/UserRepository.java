@@ -1,5 +1,7 @@
 package com.campaign_management.campaign_management.repository;
 
+import java.util.List;
+
 import com.campaign_management.campaign_management.model.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +21,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
      @Query("FROM User WHERE otp=:otp")
      User findByOtp(String otp);
+
+     @Query(value="SELECT * FROM user_tbl WHERE role!='admin'",nativeQuery = true)
+     List<User> findAllUsers();
 }

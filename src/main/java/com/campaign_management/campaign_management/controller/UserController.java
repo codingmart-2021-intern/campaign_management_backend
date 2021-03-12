@@ -13,6 +13,7 @@ import com.campaign_management.campaign_management.service.Utility;
 import com.campaign_management.campaign_management.service.implemets.UserServiceImpl;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.annotations.Any;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,11 +92,6 @@ public class UserController {
         return new ResponseEntity<String>(jsonObject.toString(), HttpStatus.OK);
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') ")
-    public ResponseEntity<List<User>> findAll() {
-        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
@@ -112,18 +108,6 @@ public class UserController {
         userServiceImpl.sendVerificationEmail(user, url);
 
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @PreAuthorize("hasRole('ROLE_ADMIN') or  hasRole('ROLE_USER')")
-    public ResponseEntity<User> updateData(@RequestBody User role, @PathVariable int id) {
-        return new ResponseEntity<>(userService.updateData(role, id), HttpStatus.OK);
-    }
-
-    @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteData(@PathVariable int id) {
-        return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
     }
 
     // validation
@@ -155,6 +139,37 @@ public class UserController {
     @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
         return new ResponseEntity<>(userService.changeNewPassword(data), HttpStatus.OK);
+    }
+
+    /* Role Assign */
+
+    // Change User Role By admin
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<User> updateData(@RequestBody User role, @PathVariable int id) {
+        return new ResponseEntity<>(userService.updateData(role, id), HttpStatus.OK);
+    }
+
+    // Change User Details by admin
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<User> updateData(@RequestBody User user, HttpServletRequest request) throws Exception {
+
+        User responseData = userRepository.save(user);
+
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ROLE_ADMIN') ")
+    public List<User> getAllUsers() {
+        return userRepository.findAllUsers();
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> deleteData(@PathVariable int id) {
+        return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
     }
 
     @GetMapping("/invalid")

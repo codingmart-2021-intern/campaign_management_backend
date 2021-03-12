@@ -28,11 +28,6 @@ public class UserServiceImpl implements UserService {
     private JavaMailSender mailSender;
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
     public User findById(int id) {
         return userRepository.findById(id).orElse(null);
     }
