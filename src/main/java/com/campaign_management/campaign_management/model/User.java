@@ -46,8 +46,8 @@ public class User {
 		return image;
 	}
 
-	public void setImage(String image_url) {
-		this.image = image_url;
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public void setName(String name) {

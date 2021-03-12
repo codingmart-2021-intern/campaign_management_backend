@@ -24,7 +24,6 @@ public class SmsController {
 
     @PostMapping(value = "/generateOtp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> sendSms(@RequestBody SmsModel data) throws JSONException {
-        System.out.println("-----------NUMBER------------------------------"+data.getPhoneNumber());
         return new ResponseEntity<>(smsService.sendSms(data), HttpStatus.OK);
     }
 
