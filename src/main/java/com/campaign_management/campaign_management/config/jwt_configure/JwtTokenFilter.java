@@ -1,4 +1,4 @@
-package com.campaign_management.campaign_management.config;
+package com.campaign_management.campaign_management.config.jwt_configure;
 
 
 import java.io.IOException;

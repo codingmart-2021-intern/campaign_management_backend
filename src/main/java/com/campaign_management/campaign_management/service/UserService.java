@@ -12,8 +12,6 @@ import org.codehaus.jettison.json.JSONException;
 
 public interface UserService {
 
-    List<User> findAll();
-
     User findById(int id);
 
     User addData(User user) throws Exception;

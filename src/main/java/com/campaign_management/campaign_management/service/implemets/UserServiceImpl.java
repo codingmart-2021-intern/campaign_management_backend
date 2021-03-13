@@ -1,6 +1,5 @@
 package com.campaign_management.campaign_management.service.implemets;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.mail.internet.MimeMessage;
@@ -28,11 +27,6 @@ public class UserServiceImpl implements UserService {
     private JavaMailSender mailSender;
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
     public User findById(int id) {
         return userRepository.findById(id).orElse(null);
     }
@@ -58,13 +52,13 @@ public class UserServiceImpl implements UserService {
     public User updateData(User user, int id) {
         User exist = userRepository.findById(id).orElse(null);
         if (exist != null) {
+            exist.setImage(user.getImage());
             exist.setName(user.getName());
             exist.setPhone(user.getPhone());
             exist.setRole(user.getRole());
             exist.setDOB(user.getDOB());
             exist.setGender(user.getGender());
             exist.setPassword(exist.getPassword());
-            
 
             userRepository.save(exist);
         }
@@ -204,7 +198,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    private void verifyOtpValidation(Long timestamp) throws Exception {
+    public void verifyOtpValidation(Long timestamp) throws Exception {
 
         Long minutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - timestamp);
         if (minutes > 3) {
