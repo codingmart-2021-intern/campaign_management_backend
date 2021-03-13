@@ -1,6 +1,5 @@
 package com.campaign_management.campaign_management.service.implemets;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.mail.internet.MimeMessage;
@@ -26,11 +25,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private JavaMailSender mailSender;
-
-    @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
 
     @Override
     public User findById(int id) {
@@ -156,7 +150,7 @@ public class UserServiceImpl implements UserService {
                 + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
 
         content = content.replace("[[name]]", user.getName());
-        String verifyURL = "http://localhost:3001" + siteURL + "/api/v1/user/verify?code=" + user.getVerificationCode();
+        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com" + siteURL + "/api/v1/user/verify?code=" + user.getVerificationCode();
         content = content.replace("[[URL]]", verifyURL);
 
         JSONObject obj = new JSONObject();
