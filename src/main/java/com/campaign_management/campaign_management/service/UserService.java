@@ -1,7 +1,5 @@
 package com.campaign_management.campaign_management.service;
 
-import java.util.*;
-
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
@@ -16,7 +14,7 @@ public interface UserService {
 
     User addData(User user) throws Exception;
 
-    User updateData(User role, int id);
+    User updateData(User user, int id);
 
     String deleteData(int id);
     

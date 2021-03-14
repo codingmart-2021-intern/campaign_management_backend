@@ -136,6 +136,7 @@ public class UserController {
 
     // changing new password..
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
         return new ResponseEntity<>(userService.changeNewPassword(data), HttpStatus.OK);
@@ -143,11 +144,11 @@ public class UserController {
 
     /* Role Assign */
 
-    // Change User Role By admin
+    // Change User Role By users
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<User> updateData(@RequestBody User role, @PathVariable int id) {
-        return new ResponseEntity<>(userService.updateData(role, id), HttpStatus.OK);
+    public ResponseEntity<User> updateData(@RequestBody User user, @PathVariable int id) {
+        return new ResponseEntity<>(userService.updateData(user, id), HttpStatus.OK);
     }
 
     // Change User Details by admin
