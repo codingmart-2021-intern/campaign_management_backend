@@ -152,8 +152,8 @@ public class UserServiceImpl implements UserService {
         String toAddress = user.getEmail();
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
-        String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
-                + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
+        String content = "<body style='text-align:center'> <h2 style='color:orange'> Dear [[name]]</h2>" + "<p>Please click the link below to verify your registration: </p><br>"
+                + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "<h5>Thank you,</h5> </body>";
 
         content = content.replace("[[name]]", user.getName());
         String verifyURL = "https://campaign-management-sb-backend.herokuapp.com" + siteURL
@@ -173,8 +173,8 @@ public class UserServiceImpl implements UserService {
         String toAddress = email;
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Otp for Forgot password";
-        String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
-                + "Thank you";
+        String content = "<body style='text-align:center'> <h1>Dear user,</h1><br>" + "<p>Please take the below otp for change new password</p> <br> <h2>" + otp + "</h2><br>"
+                + "<h5>Thank you</h5>";
 
         JSONObject obj = new JSONObject();
         obj.put("toAddress", toAddress);

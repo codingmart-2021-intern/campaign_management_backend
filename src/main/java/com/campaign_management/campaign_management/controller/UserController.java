@@ -162,7 +162,7 @@ public class UserController {
         users.forEach((user) -> userRepository.save(user));
         // User responseData = userRepository.save(user);
 
-        return "{'message': 'User role Updated'}";
+        return userServiceImpl.returnJsonString(true,"User role Updated");
     }
 
     @GetMapping("/admin")
@@ -180,7 +180,6 @@ public class UserController {
  
     /* SEND EMAIL */ 
     @PostMapping("/send-mail")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> sendNewMail( @RequestBody EmailModel mailData ) throws IOException, JSONException {
         
         JSONObject emailObj = new JSONObject();
