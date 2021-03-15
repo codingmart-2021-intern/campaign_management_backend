@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.campaign_management.campaign_management.service.MailService;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/user")
@@ -172,6 +172,12 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteData(@PathVariable int id) {
         return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/send-mail")
+    public Boolean sendMail() {
+        sendMail();
+        return true;
     }
 
     @GetMapping("/invalid")
