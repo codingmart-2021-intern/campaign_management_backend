@@ -14,16 +14,17 @@ import java.io.IOException;
 @Service
 public class MailService {
     
-      public Boolean sendMail(String[] args) throws IOException {
+      public static Boolean sendMail(String args) throws IOException {
         Email from = new Email("balaji@codingmart.com");
-        String subject = "Sending with SendGrid is Fun";
-        Email to = new Email("dinesh20003456@gmail.com");
+        String subject = "Sending with SendGrid to balaji";
+        Email to = new Email("balaji@codingmart.com");
         Content content = new Content("text/plain", "and easy to do anywhere, even with Java");
         Mail mail = new Mail(from, subject, to, content);
     
-        SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+        SendGrid sg = new SendGrid("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");
+        System.out.println("EMAIL ___");
+        System.out.println(System.getenv("SENDGRID_API_KEY"));
         Request request = new Request();
-        try {
           request.setMethod(Method.POST);
           request.setEndpoint("mail/send");
           request.setBody(mail.build());
@@ -32,9 +33,6 @@ public class MailService {
           System.out.println(response.getBody());
           System.out.println(response.getHeaders());
           return true;
-        } catch (IOException ex) {
-            return false;
-        }
       }
     
 };

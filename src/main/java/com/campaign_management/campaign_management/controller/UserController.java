@@ -1,5 +1,6 @@
 package com.campaign_management.campaign_management.controller;
 
+import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.campaign_management.campaign_management.service.MailService;
 @CrossOrigin
 @RestController
@@ -175,8 +177,8 @@ public class UserController {
     }
 
     @GetMapping("/send-mail")
-    public Boolean sendMail() {
-        sendMail();
+    public Boolean senNewMail() throws IOException {
+        MailService.sendMail("hello");
         return true;
     }
 
