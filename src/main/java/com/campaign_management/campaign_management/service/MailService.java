@@ -32,7 +32,7 @@ public class MailService {
           request.setEndpoint("mail/send");
           request.setBody(mail.build());
           Response response = sg.api(request);
-          if (response.getStatusCode() == 200) {
+          if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
             return true;
           }
           System.out.println(response.getStatusCode());

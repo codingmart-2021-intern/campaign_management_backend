@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
+import com.campaign_management.campaign_management.model.EmailModel;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
@@ -176,11 +177,26 @@ public class UserController {
         return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
     }
 
-    // @GetMapping("/send-mail")
-    // public Boolean senNewMail() throws IOException {
-    //     MailService.sendMail("hello");
-    //     return true;
-    // }
+ 
+    /* SEND EMAIL */ 
+    @PostMapping("/send-mail")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> sendNewMail( @RequestBody EmailModel mailData ) throws IOException, JSONException {
+        
+        JSONObject emailObj = new JSONObject();
+
+        emailObj.put("toAddress", mailData.getToAddress());
+        emailObj.put("subject", mailData.getSubject());
+        emailObj.put("content", mailData.getContent());
+        emailObj.put("senderName", mailData.getSenderName());
+
+        Boolean status =  MailService.sendMail(emailObj);
+        if (status == true) {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Unable to send email to this address"),HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
 
     @GetMapping("/invalid")
     public String invalid() {
