@@ -176,11 +176,11 @@ public class UserController {
         return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
     }
 
-    @GetMapping("/send-mail")
-    public Boolean senNewMail() throws IOException {
-        MailService.sendMail("hello");
-        return true;
-    }
+    // @GetMapping("/send-mail")
+    // public Boolean senNewMail() throws IOException {
+    //     MailService.sendMail("hello");
+    //     return true;
+    // }
 
     @GetMapping("/invalid")
     public String invalid() {
