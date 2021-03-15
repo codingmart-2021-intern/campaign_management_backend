@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import net.bytebuddy.utility.RandomString;
 
+import com.campaign_management.campaign_management.service.MailService;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -148,7 +150,6 @@ public class UserServiceImpl implements UserService {
     // call from controller for signup Email verification
     public void sendVerificationEmail(User user, String siteURL) throws Exception {
         String toAddress = user.getEmail();
-        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
         String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
@@ -161,17 +162,15 @@ public class UserServiceImpl implements UserService {
 
         JSONObject obj = new JSONObject();
         obj.put("toAddress", toAddress);
-        obj.put("fromAddress", fromAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        sendMailer(obj);
+        MailService.sendMail(obj);
     }
 
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
-        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
@@ -179,12 +178,11 @@ public class UserServiceImpl implements UserService {
 
         JSONObject obj = new JSONObject();
         obj.put("toAddress", toAddress);
-        obj.put("fromAddress", fromAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        sendMailer(obj);
+        MailService.sendMail(obj);
     }
 
     public String generateOtp() {
