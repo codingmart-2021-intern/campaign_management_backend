@@ -14,8 +14,11 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import net.bytebuddy.utility.RandomString;
+
+import com.campaign_management.campaign_management.service.MailService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
             user.setVerificationCode(code);
             user.setEnabled(false);
             user.setMbverify(false);
+            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
             return userRepository.save(user);
         }
 
@@ -114,7 +118,7 @@ public class UserServiceImpl implements UserService {
         }
         verifyOtpValidation(res_data.getTimestamp());
 
-        res_data.setPassword(data.getPassword());
+        res_data.setPassword(new BCryptPasswordEncoder().encode(data.getPassword()));
 
         userRepository.save(res_data);
 
@@ -125,10 +129,13 @@ public class UserServiceImpl implements UserService {
     public String changeNewPassword(SetNewPassword data) throws Exception {
         User res_data = userRepository.findByEmail(data.getEmail());
 
-        if (!res_data.getPassword().equals(data.getOldPassword())) {
+
+        System.out.println();
+
+        if (!new BCryptPasswordEncoder().matches(data.getOldPassword(), res_data.getPassword())) {
             throw new Exception("old password was wrong");
         }
-        res_data.setPassword(data.getNewPassword());
+        res_data.setPassword(new BCryptPasswordEncoder().encode(data.getNewPassword()));
         userRepository.save(res_data);
 
         return returnJsonString(true, "password changed successfully!!");
@@ -143,29 +150,27 @@ public class UserServiceImpl implements UserService {
     // call from controller for signup Email verification
     public void sendVerificationEmail(User user, String siteURL) throws Exception {
         String toAddress = user.getEmail();
-        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
         String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
                 + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
 
         content = content.replace("[[name]]", user.getName());
-        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com" + siteURL + "/api/v1/user/verify?code=" + user.getVerificationCode();
+        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com" + siteURL
+                + "/api/v1/user/verify?code=" + user.getVerificationCode();
         content = content.replace("[[URL]]", verifyURL);
 
         JSONObject obj = new JSONObject();
         obj.put("toAddress", toAddress);
-        obj.put("fromAddress", fromAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        sendMailer(obj);
+        MailService.sendMail(obj);
     }
 
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
-        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
@@ -173,12 +178,11 @@ public class UserServiceImpl implements UserService {
 
         JSONObject obj = new JSONObject();
         obj.put("toAddress", toAddress);
-        obj.put("fromAddress", fromAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        sendMailer(obj);
+        MailService.sendMail(obj);
     }
 
     public String generateOtp() {

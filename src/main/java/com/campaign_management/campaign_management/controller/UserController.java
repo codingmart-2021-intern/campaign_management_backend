@@ -1,8 +1,10 @@
 package com.campaign_management.campaign_management.controller;
 
+import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
+import com.campaign_management.campaign_management.model.EmailModel;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.campaign_management.campaign_management.service.MailService;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/user")
@@ -136,6 +139,7 @@ public class UserController {
 
     // changing new password..
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
         return new ResponseEntity<>(userService.changeNewPassword(data), HttpStatus.OK);
@@ -143,11 +147,11 @@ public class UserController {
 
     /* Role Assign */
 
-    // Change User Role By admin
+    // Change User Role By users
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<User> updateData(@RequestBody User role, @PathVariable int id) {
-        return new ResponseEntity<>(userService.updateData(role, id), HttpStatus.OK);
+    public ResponseEntity<User> updateData(@RequestBody User user, @PathVariable int id) {
+        return new ResponseEntity<>(userService.updateData(user, id), HttpStatus.OK);
     }
 
     // Change User Details by admin
@@ -171,6 +175,27 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteData(@PathVariable int id) {
         return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
+    }
+
+ 
+    /* SEND EMAIL */ 
+    @PostMapping("/send-mail")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> sendNewMail( @RequestBody EmailModel mailData ) throws IOException, JSONException {
+        
+        JSONObject emailObj = new JSONObject();
+
+        emailObj.put("toAddress", mailData.getToAddress());
+        emailObj.put("subject", mailData.getSubject());
+        emailObj.put("content", mailData.getContent());
+        emailObj.put("senderName", mailData.getSenderName());
+
+        Boolean status =  MailService.sendMail(emailObj);
+        if (status == true) {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Unable to send email to this address"),HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @GetMapping("/invalid")
