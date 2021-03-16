@@ -38,7 +38,7 @@ public class Schedule {
 	@Id
 	@Column(name="scheduled_at")
 	private Date scheduled_at;
-	
+
 	public Date getScheduled_at() {
 		return scheduled_at;
 	}

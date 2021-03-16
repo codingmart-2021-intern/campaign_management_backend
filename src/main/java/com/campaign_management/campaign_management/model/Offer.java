@@ -45,7 +45,10 @@ public class Offer {
 	@OneToOne(fetch = FetchType.EAGER, targetEntity=User.class)
 	@JoinColumn(name="user_id")
 	private User user_id;
-
+	
+	@Column(name="title")
+	private String title;
+	
 	public User getUser_id() {
 		return user_id;
 	}
@@ -84,5 +87,13 @@ public class Offer {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }
