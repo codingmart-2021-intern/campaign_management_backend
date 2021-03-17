@@ -12,13 +12,14 @@ import com.campaign_management.campaign_management.service.UserService;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import net.bytebuddy.utility.RandomString;
-
-import com.campaign_management.campaign_management.service.MailService;
+// import com.campaign_management.campaign_management.service.MailService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,31 +30,43 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JavaMailSender mailSender;
 
+    // find user by d
     @Override
-    public User findById(int id) {
-        return userRepository.findById(id).orElse(null);
+    public ResponseEntity<User> findById(int id) {
+        User res_data = userRepository.findById(id).get();
+        if (res_data != null) {
+            return new ResponseEntity<>(res_data, HttpStatus.OK);
+        }
+        return new ResponseEntity<>((User) res_data, HttpStatus.NOT_FOUND);
     }
 
+    // signup
     @Override
-    public User addData(User user) throws Exception {
+    public ResponseEntity<?> addData(User user) throws Exception {
 
         User existData = userRepository.findByEmail(user.getEmail());
 
         if (existData != null) {
-            throw new Exception("Email already exist please try with new mail");
+            return new ResponseEntity<>(returnJsonString(false, "Email already exist please try with new mail"),
+                    HttpStatus.FORBIDDEN);
         } else {
             String code = generateVerficationCode();
             user.setVerificationCode(code);
             user.setEnabled(false);
             user.setMbverify(false);
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            return userRepository.save(user);
+            sendVerificationEmail(user);
+
+            return new ResponseEntity<>(returnJsonString(true, "SignIn success please check the mail for verification"),
+                    HttpStatus.CREATED);
         }
 
     }
 
+    // update user profile
+
     @Override
-    public User updateData(User user, int id) {
+    public ResponseEntity<?> updateData(User user, int id) throws JSONException {
         User exist = userRepository.findById(id).orElse(null);
         if (exist != null) {
             exist.setImage(user.getImage());
@@ -63,42 +76,46 @@ public class UserServiceImpl implements UserService {
             exist.setDOB(user.getDOB());
             exist.setGender(user.getGender());
             exist.setPassword(exist.getPassword());
+            return new ResponseEntity<>(userRepository.save(exist), HttpStatus.OK);
 
-            userRepository.save(exist);
         }
-        return exist;
+        return new ResponseEntity<>(returnJsonString(false, "user Not found"), HttpStatus.OK);
     }
 
+    // delete the data
     @Override
-    public String deleteData(int id) {
-        JSONObject jsonObject = new JSONObject();
+    public ResponseEntity<?> deleteData(int id) throws JSONException {
         try {
             userRepository.deleteById(id);
-            jsonObject.put("message", "user data deleted");
+            return new ResponseEntity<>(returnJsonString(true, "data deleted successfully"), HttpStatus.OK);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        return jsonObject.toString();
+        return new ResponseEntity<>(returnJsonString(false, "data deleted failed"), HttpStatus.OK);
     }
 
+    // check email verification
     @Override
-    public String checkEmailVerification(String code) throws JSONException {
+    public ResponseEntity<?> checkEmailVerification(String code) throws JSONException {
         User res_data = userRepository.findByVerificationCode(code);
         if (res_data != null) {
             res_data.setEnabled(true);
             userRepository.save(res_data);
-            return returnJsonString(true, "verified");
+            return new ResponseEntity<>(returnJsonString(true, "verified"), HttpStatus.OK);
         }
-        return returnJsonString(false, "Not verified sorry!!");
+        return new ResponseEntity<>(returnJsonString(false, "Not verified sorry!!"), HttpStatus.FORBIDDEN);
     }
 
+    // forgot password
     @Override
-    public String forgotPassword(ForgotPassword data) throws Exception {
+    public ResponseEntity<?> forgotPassword(ForgotPassword data) throws Exception {
         String email = data.getEmail();
         User res_data = userRepository.findByEmail(email);
         if (res_data == null || !res_data.getEnabled()) {
-            throw new Exception("Enter email Id not found in our database");
+            return new ResponseEntity<>(returnJsonString(false, "Enter email Id not found in our database"),
+                    HttpStatus.FORBIDDEN);
+
         }
 
         String otp = generateOtp();
@@ -107,39 +124,46 @@ public class UserServiceImpl implements UserService {
         userRepository.save(res_data);
         sendForgotPasswordEmail(email, otp);
 
-        return returnJsonString(true, "OTP send !!");
+        return new ResponseEntity<>(returnJsonString(true, "OTP send !!"), HttpStatus.OK);
     }
 
+    // otp verification
     @Override
-    public String otpVerification(OtpVefication data) throws Exception {
+    public ResponseEntity<?> otpVerification(OtpVefication data) throws Exception {
         User res_data = userRepository.findByOtp(data.getOtp());
         if (res_data == null || !res_data.getOtp().equals(data.getOtp()) || !res_data.getEnabled()) {
-            throw new Exception("enter otp was wrong!!");
+            return new ResponseEntity<>(returnJsonString(false, "enter otp was wrong!!"), HttpStatus.FORBIDDEN);
+
         }
-        verifyOtpValidation(res_data.getTimestamp());
+        if (!verifyOtpValidation(res_data.getTimestamp())) {
+            return new ResponseEntity<>(returnJsonString(false, "Otp was expired!!"), HttpStatus.OK);
+        }
 
         res_data.setPassword(new BCryptPasswordEncoder().encode(data.getPassword()));
 
         userRepository.save(res_data);
 
-        return returnJsonString(true, "Otp verified successfully!!");
+        return new ResponseEntity<>(returnJsonString(true, "Otp verified successfully!!"), HttpStatus.OK);
     }
 
+    // change password
     @Override
-    public String changeNewPassword(SetNewPassword data) throws Exception {
+    public ResponseEntity<?> changeNewPassword(SetNewPassword data) throws Exception {
         User res_data = userRepository.findByEmail(data.getEmail());
-
 
         System.out.println();
 
         if (!new BCryptPasswordEncoder().matches(data.getOldPassword(), res_data.getPassword())) {
-            throw new Exception("old password was wrong");
+            return new ResponseEntity<>(returnJsonString(false, "old password was wrong"), HttpStatus.FORBIDDEN);
+
         }
         res_data.setPassword(new BCryptPasswordEncoder().encode(data.getNewPassword()));
         userRepository.save(res_data);
 
-        return returnJsonString(true, "password changed successfully!!");
+        return new ResponseEntity<>(returnJsonString(true, "password changed successfully!!"), HttpStatus.OK);
     }
+
+    // -----------------------------------------------------
 
     // Helper functions
     public String generateVerficationCode() {
@@ -148,7 +172,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // call from controller for signup Email verification
-    public void sendVerificationEmail(User user, String siteURL) throws Exception {
+    public void sendVerificationEmail(User user) throws Exception {
         String toAddress = user.getEmail();
         String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
@@ -157,8 +181,8 @@ public class UserServiceImpl implements UserService {
                 + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
 
         content = content.replace("[[name]]", user.getName());
-        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com" + siteURL
-                + "/api/v1/user/verify?code=" + user.getVerificationCode();
+        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com/rest" + "/api/v1/user/verify?code="
+                + user.getVerificationCode();
         content = content.replace("[[URL]]", verifyURL);
 
         JSONObject obj = new JSONObject();
@@ -170,7 +194,7 @@ public class UserServiceImpl implements UserService {
 
         sendMailer(obj);
 
-        //send grid
+        // send grid
         // MailService.sendMail(obj);
     }
 
@@ -191,8 +215,7 @@ public class UserServiceImpl implements UserService {
 
         sendMailer(obj);
 
-
-        //send grid
+        // send grid
         // MailService.sendMail(obj);
     }
 
@@ -205,8 +228,7 @@ public class UserServiceImpl implements UserService {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom(data.get("fromAddress").toString(), 
-        data.get("senderName").toString());
+        helper.setFrom(data.get("fromAddress").toString(), data.get("senderName").toString());
         helper.setTo(data.get("toAddress").toString());
         helper.setSubject(data.get("subject").toString());
         helper.setText(data.get("content").toString(), true);
@@ -214,13 +236,13 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public void verifyOtpValidation(Long timestamp) throws Exception {
+    public boolean verifyOtpValidation(Long timestamp) throws Exception {
 
         Long minutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - timestamp);
         if (minutes > 3) {
-            throw new Exception("otp was expired");
+            return false;
         }
-        return;
+        return true;
     }
 
     public String returnJsonString(boolean status, String response) throws JSONException {

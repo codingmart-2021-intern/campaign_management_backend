@@ -11,7 +11,6 @@ import com.campaign_management.campaign_management.model.SetNewPassword;
 import com.campaign_management.campaign_management.model.User;
 import com.campaign_management.campaign_management.repository.UserRepository;
 import com.campaign_management.campaign_management.service.UserService;
-import com.campaign_management.campaign_management.service.Utility;
 import com.campaign_management.campaign_management.service.implemets.UserServiceImpl;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,8 +32,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.campaign_management.campaign_management.service.MailService;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/user")
@@ -58,23 +56,28 @@ public class UserController {
     @Autowired
     private UserServiceImpl userServiceImpl;
 
-
-
-    // Login  AUTHENTICATE..
-    @PostMapping(value = "/authenticate", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    // Login AUTHENTICATE..
+    @PostMapping(value = "/authenticate")
     public ResponseEntity<String> authenticate(@RequestBody User user) throws Exception {
         log.info("UserResourceImpl : authenticate");
 
+        JSONObject jsonObject = new JSONObject();
+
         User res_data = userRepository.findByEmail(user.getEmail());
-        if (res_data != null) {
-            if (!res_data.getEnabled()) {
-                throw new Exception("Please verify the email to continue");
-            }
+
+        if (res_data == null) {
+            return new ResponseEntity<String>(
+                    userServiceImpl.returnJsonString(false, "your data is not found in database"),
+                    HttpStatus.NOT_FOUND);
+        }
+        if (!res_data.getEnabled()) {
+            return new ResponseEntity<String>(
+                    userServiceImpl.returnJsonString(false, "please verify the email to continue"),
+                    HttpStatus.FORBIDDEN);
         }
 
         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        JSONObject jsonObject = new JSONObject();
         try {
             String email = user.getEmail();
 
@@ -96,70 +99,68 @@ public class UserController {
         return new ResponseEntity<String>(jsonObject.toString(), HttpStatus.OK);
     }
 
-
-    //get user details by id
+    // get user details by id
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<User> findById(@PathVariable int id) {
-        return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
+    public ResponseEntity<?> findById(@PathVariable int id) {
+        return userService.findById(id);
     }
 
-    //signup
-    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> addData(@RequestBody User user, HttpServletRequest request) throws Exception {
-
-        User responseData = userService.addData(user);
-
-        String url = Utility.getSiteURL(request);
-        userServiceImpl.sendVerificationEmail(user, url);
-
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+    // signup
+    @PostMapping(value = "/signup")
+    public ResponseEntity<?> addData(@RequestBody User user) throws Exception {
+        return userService.addData(user);
     }
 
     // validation (checking token expires or not)
     @GetMapping(value = "/validate/{token}")
-    public ResponseEntity<Boolean> validate(@PathVariable String token) {
-        return new ResponseEntity<>(tokenProvider.validateToken(token), HttpStatus.OK);
+    public ResponseEntity<?> validate(@PathVariable String token) throws JSONException {
+
+        boolean res_data = tokenProvider.validateToken(token);
+        if (res_data) {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation success"), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation error"), HttpStatus.FORBIDDEN);
     }
 
-    //email verification
+    // email verification
     @GetMapping(value = "/verify")
-    public ResponseEntity<String> verifyMail(@Param("code") String code) throws JSONException {
-        return new ResponseEntity<>(userService.checkEmailVerification(code), HttpStatus.OK);
+    public ResponseEntity<?> verifyMail(@Param("code") String code) throws JSONException {
+        return userService.checkEmailVerification(code);
     }
 
-     
     // reset forgot password (requesting for otp)
-    @PostMapping(value = "/forgotpassword/generate/otp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPassword data) throws Exception {
-        return new ResponseEntity<>(userService.forgotPassword(data), HttpStatus.OK);
+    @PostMapping(value = "/forgotpassword/generate/otp")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPassword data) throws Exception {
+        return userService.forgotPassword(data);
     }
 
     // otp verification
-    @PostMapping(value = "/forgotpassword/reset", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> resetPassword(@RequestBody OtpVefication data) throws Exception {
-        return new ResponseEntity<>(userService.otpVerification(data), HttpStatus.OK);
+    @PostMapping(value = "/forgotpassword/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody OtpVefication data) throws Exception {
+        return userService.otpVerification(data);
     }
 
     // changing new password..
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
-        return new ResponseEntity<>(userService.changeNewPassword(data), HttpStatus.OK);
+    @PostMapping(value = "/newpassword")
+    public ResponseEntity<?> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
+        return userService.changeNewPassword(data);
     }
 
     /* Role Assign */
 
-    // Change User details  By users (profile page)
+    // Change User details By users (profile page)
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> updateData(@RequestBody User user, @PathVariable int id) {
-        return new ResponseEntity<>(userService.updateData(user, id), HttpStatus.OK);
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateData(@RequestBody User user, @PathVariable int id) throws JSONException {
+        return userService.updateData(user, id);
     }
 
     // Change User role by admin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/admin")
     public String updateData(@RequestBody List<User> users, HttpServletRequest request) throws Exception {
 
         users.forEach((user) -> userRepository.save(user));
@@ -168,28 +169,25 @@ public class UserController {
         return userServiceImpl.returnJsonString(true, "User role updated");
     }
 
-
-    //get only user not admin details
+    // get only user not admin details
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN') ")
     public List<User> getAllUsers() {
         return userRepository.findAllUsers();
     }
 
-
-    //deleting user details by admin
+    // deleting user details by admin
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteData(@PathVariable int id) {
-        return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
+    public ResponseEntity<?> deleteData(@PathVariable int id) throws JSONException {
+        return userService.deleteData(id);
     }
 
- 
-    /* SEND EMAIL bt sendgrid */ 
+    /* SEND EMAIL bt sendgrid */
     @PostMapping("/send-mail")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> sendNewMail( @RequestBody EmailModel mailData ) throws IOException, JSONException {
-        
+    public ResponseEntity<String> sendNewMail(@RequestBody EmailModel mailData) throws IOException, JSONException {
+
         JSONObject emailObj = new JSONObject();
 
         emailObj.put("toAddress", mailData.getToAddress());
@@ -197,17 +195,17 @@ public class UserController {
         emailObj.put("content", mailData.getContent());
         emailObj.put("senderName", mailData.getSenderName());
 
-        Boolean status =  MailService.sendMail(emailObj);
+        Boolean status = MailService.sendMail(emailObj);
         if (status == true) {
-            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),HttpStatus.OK);
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),
+                    HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Unable to send email to this address"),HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Unable to send email to this address"),
+                    HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
-
-
-    //invalid exception
+    // invalid exception
     @GetMapping("/invalid")
     public String invalid() {
         log.info("executing invalid");
