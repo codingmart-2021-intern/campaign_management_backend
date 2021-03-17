@@ -115,7 +115,8 @@ public class OfferController {
 	public ResponseEntity<?> deleteOffer(@PathVariable int id){
 		try {
 			
-			if( offerRepository.findById(id).isEmpty() )
+			Optional<Offer> isOfferPresent = offerRepository.findById(id);
+			if( isOfferPresent.isEmpty() )
 				return new ResponseEntity<>("No data available for that id to delete offer", HttpStatus.NOT_ACCEPTABLE);
 			
 			if( scheduleRepository.findOneScheduleOfferId(id).isPresent() )
