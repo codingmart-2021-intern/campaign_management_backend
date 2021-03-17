@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(res_data);
 
-        return new ResponseEntity<>(returnJsonString(true, "Otp verified successfully!!"), HttpStatus.OK);
+        return new ResponseEntity<>(returnJsonString(true, "Password Changed successfully!!"), HttpStatus.OK);
     }
 
     // change password
