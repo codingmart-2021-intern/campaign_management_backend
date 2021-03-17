@@ -73,7 +73,7 @@ public class UserController {
         if (!res_data.getEnabled()) {
             return new ResponseEntity<String>(
                     userServiceImpl.returnJsonString(false, "please verify the email to continue"),
-                    HttpStatus.FORBIDDEN);
+                    HttpStatus.NOT_ACCEPTABLE);
         }
 
         authenticationManager
