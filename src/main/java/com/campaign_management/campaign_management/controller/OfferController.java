@@ -3,6 +3,8 @@ package com.campaign_management.campaign_management.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ public class OfferController {
 	private ScheduleRepository scheduleRepository;
 	
 	@RequestMapping("/")
-	public ResponseEntity<?> getOffer(){
+	public ResponseEntity<?> getOffer() throws Exception  {
 		
 		List<Offer> offers = offerRepository.findAll();
 		
@@ -42,11 +44,11 @@ public class OfferController {
 			return new ResponseEntity<List<Offer>>(offers, HttpStatus.OK);
 		}
 		else
-			return new ResponseEntity<>("No offers available", HttpStatus.NOT_FOUND);	
+			return new ResponseEntity<>(returnJsonString(false,"No offers available"), HttpStatus.NOT_FOUND);	
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
-	public ResponseEntity<?> addOffer(@RequestBody Offer offer,@PathVariable int id){
+	public ResponseEntity<?> addOffer(@RequestBody Offer offer,@PathVariable int id) throws Exception {
 		
 		try {
 
@@ -61,32 +63,32 @@ public class OfferController {
 						return new ResponseEntity<Offer>(offer, HttpStatus.OK);
 					}
 					else
-						return new ResponseEntity<>("created_at should not be null", HttpStatus.NOT_ACCEPTABLE);
+						return new ResponseEntity<>(returnJsonString(false,"created_at should not be null"), HttpStatus.NOT_ACCEPTABLE);
 				}
 				else
-					return new ResponseEntity<>("data should not be null", HttpStatus.NOT_ACCEPTABLE);
+					return new ResponseEntity<>(returnJsonString(false,"data should not be null"), HttpStatus.NOT_ACCEPTABLE);
 			}
 			else 
-				return new ResponseEntity<>("No users available for the requested user_id", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"No users available for the requested user_id"), HttpStatus.NOT_FOUND);
 			
 		}catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/")
-	public ResponseEntity<?> updateOffer(@RequestBody Offer offer){
+	public ResponseEntity<?> updateOffer(@RequestBody Offer offer) throws Exception {
 
 		try {
 			Optional<Offer> isOfferPresent = offerRepository.findById(offer.getOffer_id());
 			
-			if( isOfferPresent.isEmpty() )
-				return new ResponseEntity<>("No offer available for the requested offer_id", HttpStatus.NOT_FOUND);
+			if( !isOfferPresent.isPresent() )
+				return new ResponseEntity<>(returnJsonString(false,"No offer available for the requested offer_id"), HttpStatus.NOT_FOUND);
 			
 			Offer offerFetched = isOfferPresent.get();
 			
 			if( offerFetched.getStatus().equalsIgnoreCase("sent") )
-				return new ResponseEntity<>("Offer cannot be update because it is already sent", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"Offer cannot be update because it is already sent"), HttpStatus.NOT_FOUND);
 			
 			if( offer.getCreated_at() == null )
 				offer.setCreated_at(offerFetched.getCreated_at());
@@ -107,26 +109,34 @@ public class OfferController {
 			return new ResponseEntity<Offer>(offer, HttpStatus.OK);
 			
 		}catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@RequestMapping(method=RequestMethod.DELETE, value="/{id}")
-	public ResponseEntity<?> deleteOffer(@PathVariable int id){
+	public ResponseEntity<?> deleteOffer(@PathVariable int id) throws Exception {
 		try {
 			
-			if( offerRepository.findById(id).isEmpty() )
-				return new ResponseEntity<>("No data available for that id to delete offer", HttpStatus.NOT_ACCEPTABLE);
+			Optional<Offer> isOfferPresent = offerRepository.findById(id);
+			if( !isOfferPresent.isPresent() )
+				return new ResponseEntity<>(returnJsonString(false,"No data available for that id to delete offer"), HttpStatus.NOT_ACCEPTABLE);
 			
 			if( scheduleRepository.findOneScheduleOfferId(id).isPresent() )
-				return new ResponseEntity<>("It is already scheduled so deletion is not possible", HttpStatus.NOT_ACCEPTABLE);
+				return new ResponseEntity<>(returnJsonString(false,"It is already scheduled so deletion is not possible"), HttpStatus.NOT_ACCEPTABLE);
 			
 			offerRepository.deleteById(id);
 			
-			return new ResponseEntity<>("Deleted offer with id = "+id, HttpStatus.OK);
+			return new ResponseEntity<>(returnJsonString(false,"Deleted offer with id = "+id), HttpStatus.OK);
 		}
 		catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	public String returnJsonString(boolean status, String response) throws JSONException  {
+		JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", status);
+        jsonObject.put("message", response);
+        return jsonObject.toString();
 	}
 }
