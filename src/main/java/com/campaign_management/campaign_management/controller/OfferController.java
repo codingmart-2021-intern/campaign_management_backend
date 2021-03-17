@@ -116,7 +116,7 @@ public class OfferController {
 		try {
 			
 			Optional<Offer> isOfferPresent = offerRepository.findById(id);
-			if( isOfferPresent.isEmpty() )
+			if( !isOfferPresent.isPresent() )
 				return new ResponseEntity<>("No data available for that id to delete offer", HttpStatus.NOT_ACCEPTABLE);
 			
 			if( scheduleRepository.findOneScheduleOfferId(id).isPresent() )
