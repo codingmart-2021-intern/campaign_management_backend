@@ -150,6 +150,7 @@ public class UserServiceImpl implements UserService {
     // call from controller for signup Email verification
     public void sendVerificationEmail(User user, String siteURL) throws Exception {
         String toAddress = user.getEmail();
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
         String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
@@ -161,28 +162,38 @@ public class UserServiceImpl implements UserService {
         content = content.replace("[[URL]]", verifyURL);
 
         JSONObject obj = new JSONObject();
+        obj.put("fromAddress", fromAddress);
         obj.put("toAddress", toAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        MailService.sendMail(obj);
+        sendMailer(obj);
+
+        //send grid
+        // MailService.sendMail(obj);
     }
 
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
                 + "Thank you";
 
         JSONObject obj = new JSONObject();
+        obj.put("fromAddress", fromAddress);
         obj.put("toAddress", toAddress);
         obj.put("senderName", senderName);
         obj.put("subject", subject);
         obj.put("content", content);
 
-        MailService.sendMail(obj);
+        sendMailer(obj);
+
+
+        //send grid
+        // MailService.sendMail(obj);
     }
 
     public String generateOtp() {
@@ -194,7 +205,8 @@ public class UserServiceImpl implements UserService {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom(data.get("fromAddress").toString(), data.get("senderName").toString());
+        helper.setFrom(data.get("fromAddress").toString(), 
+        data.get("senderName").toString());
         helper.setTo(data.get("toAddress").toString());
         helper.setSubject(data.get("subject").toString());
         helper.setText(data.get("content").toString(), true);

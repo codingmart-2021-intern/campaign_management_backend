@@ -58,8 +58,9 @@ public class UserController {
     @Autowired
     private UserServiceImpl userServiceImpl;
 
-    // AUTHENTICATE..
 
+
+    // Login  AUTHENTICATE..
     @PostMapping(value = "/authenticate", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> authenticate(@RequestBody User user) throws Exception {
         log.info("UserResourceImpl : authenticate");
@@ -96,12 +97,14 @@ public class UserController {
     }
 
 
+    //get user details by id
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<User> findById(@PathVariable int id) {
         return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
     }
 
+    //signup
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> addData(@RequestBody User user, HttpServletRequest request) throws Exception {
 
@@ -113,32 +116,32 @@ public class UserController {
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }
 
-    // validation
-
+    // validation (checking token expires or not)
     @GetMapping(value = "/validate/{token}")
     public ResponseEntity<Boolean> validate(@PathVariable String token) {
         return new ResponseEntity<>(tokenProvider.validateToken(token), HttpStatus.OK);
     }
 
+    //email verification
     @GetMapping(value = "/verify")
     public ResponseEntity<String> verifyMail(@Param("code") String code) throws JSONException {
         return new ResponseEntity<>(userService.checkEmailVerification(code), HttpStatus.OK);
     }
 
-    // reset forgot password
-
+     
+    // reset forgot password (requesting for otp)
     @PostMapping(value = "/forgotpassword/generate/otp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPassword data) throws Exception {
         return new ResponseEntity<>(userService.forgotPassword(data), HttpStatus.OK);
     }
 
+    // otp verification
     @PostMapping(value = "/forgotpassword/reset", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> resetPassword(@RequestBody OtpVefication data) throws Exception {
         return new ResponseEntity<>(userService.otpVerification(data), HttpStatus.OK);
     }
 
     // changing new password..
-
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
@@ -147,14 +150,14 @@ public class UserController {
 
     /* Role Assign */
 
-    // Change User Role By users
+    // Change User details  By users (profile page)
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<User> updateData(@RequestBody User user, @PathVariable int id) {
         return new ResponseEntity<>(userService.updateData(user, id), HttpStatus.OK);
     }
 
-    // Change User Details by admin
+    // Change User role by admin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updateData(@RequestBody List<User> users, HttpServletRequest request) throws Exception {
@@ -162,15 +165,19 @@ public class UserController {
         users.forEach((user) -> userRepository.save(user));
         // User responseData = userRepository.save(user);
 
-        return "{'message': 'User role Updated'}";
+        return userServiceImpl.returnJsonString(true, "User role updated");
     }
 
+
+    //get only user not admin details
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN') ")
     public List<User> getAllUsers() {
         return userRepository.findAllUsers();
     }
 
+
+    //deleting user details by admin
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteData(@PathVariable int id) {
@@ -178,7 +185,7 @@ public class UserController {
     }
 
  
-    /* SEND EMAIL */ 
+    /* SEND EMAIL bt sendgrid */ 
     @PostMapping("/send-mail")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> sendNewMail( @RequestBody EmailModel mailData ) throws IOException, JSONException {
@@ -198,6 +205,9 @@ public class UserController {
         }
     }
 
+
+
+    //invalid exception
     @GetMapping("/invalid")
     public String invalid() {
         log.info("executing invalid");
