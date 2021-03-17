@@ -162,7 +162,7 @@ public class UserController {
         users.forEach((user) -> userRepository.save(user));
         // User responseData = userRepository.save(user);
 
-        return "{'message': 'User role Updated'}";
+        return userServiceImpl.returnJsonString(true, "User role updated");
     }
 
     @GetMapping("/admin")

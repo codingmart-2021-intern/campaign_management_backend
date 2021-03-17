@@ -33,6 +33,9 @@ public class MailService {
           request.setBody(mail.build());
           Response response = sg.api(request);
           if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println(response.getHeaders());
             return true;
           }
           System.out.println(response.getStatusCode());
