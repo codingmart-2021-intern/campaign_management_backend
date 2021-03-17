@@ -145,7 +145,7 @@ public class ScheduleController {
 			
 			Optional<Schedule> isSchedulePresent = scheduleRepository.findById(date);
 			
-			if( isSchedulePresent.isEmpty() )
+			if( !isSchedulePresent.isPresent() )
 				return new ResponseEntity<>("Schedule is not available to delete", HttpStatus.NOT_ACCEPTABLE);
 			
 			Schedule schedule = isSchedulePresent.get();

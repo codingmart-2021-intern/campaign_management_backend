@@ -80,7 +80,7 @@ public class OfferController {
 		try {
 			Optional<Offer> isOfferPresent = offerRepository.findById(offer.getOffer_id());
 			
-			if( isOfferPresent.isEmpty() )
+			if( !isOfferPresent.isPresent() )
 				return new ResponseEntity<>("No offer available for the requested offer_id", HttpStatus.NOT_FOUND);
 			
 			Offer offerFetched = isOfferPresent.get();
