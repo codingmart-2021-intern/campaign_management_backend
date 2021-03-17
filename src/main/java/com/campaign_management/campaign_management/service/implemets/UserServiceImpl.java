@@ -112,10 +112,14 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> forgotPassword(ForgotPassword data) throws Exception {
         String email = data.getEmail();
         User res_data = userRepository.findByEmail(email);
-        if (res_data == null || !res_data.getEnabled()) {
+        if (res_data == null) {
             return new ResponseEntity<>(returnJsonString(false, "Enter email Id not found in our database"),
                     HttpStatus.FORBIDDEN);
 
+        }
+        if (!res_data.getEnabled()) {
+            return new ResponseEntity<>(returnJsonString(false, "Please Verify the email to change password!!"),
+                    HttpStatus.FORBIDDEN);
         }
 
         String otp = generateOtp();
@@ -124,7 +128,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(res_data);
         sendForgotPasswordEmail(email, otp);
 
-        return new ResponseEntity<>(returnJsonString(true, "OTP send !!"), HttpStatus.OK);
+        return new ResponseEntity<>(returnJsonString(true, "OTP send to the Email please check spam too !!"), HttpStatus.OK);
     }
 
     // otp verification
@@ -132,11 +136,11 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> otpVerification(OtpVefication data) throws Exception {
         User res_data = userRepository.findByOtp(data.getOtp());
         if (res_data == null || !res_data.getOtp().equals(data.getOtp()) || !res_data.getEnabled()) {
-            return new ResponseEntity<>(returnJsonString(false, "enter otp was wrong!!"), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(returnJsonString(false, "Entered otp was wrong!!"), HttpStatus.FORBIDDEN);
 
         }
         if (!verifyOtpValidation(res_data.getTimestamp())) {
-            return new ResponseEntity<>(returnJsonString(false, "Otp was expired!!"), HttpStatus.OK);
+            return new ResponseEntity<>(returnJsonString(false, "Otp was expired!!"), HttpStatus.FORBIDDEN);
         }
 
         res_data.setPassword(new BCryptPasswordEncoder().encode(data.getPassword()));
