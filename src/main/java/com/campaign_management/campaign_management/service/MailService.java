@@ -24,7 +24,8 @@ public class MailService {
         Content content = new Content("text/html",bodyContent);
         Mail mail = new Mail(from, subject, to, content);
     
-        SendGrid sg = new SendGrid("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");
+//        SendGrid sg = new SendGrid("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");
+        SendGrid sg = new SendGrid("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");
         System.out.println("EMAIL ___");
         System.out.println(System.getenv("SENDGRID_API_KEY"));
         Request request = new Request();
