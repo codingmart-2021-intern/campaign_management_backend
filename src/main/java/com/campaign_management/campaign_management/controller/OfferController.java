@@ -155,6 +155,9 @@ public class OfferController {
 			
 			if( offer.getUser_id() == null )
 				offer.setUser_id(offerFetched.getUser_id());
+			
+			if( offer.getTitle() == null )
+				offer.setTitle(offerFetched.getTitle());
 				
 			offerRepository.save(offer);
 			return new ResponseEntity<Offer>(offer, HttpStatus.OK);
