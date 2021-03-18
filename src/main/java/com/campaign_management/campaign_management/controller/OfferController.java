@@ -104,9 +104,6 @@ public class OfferController {
 			
 			if( user.isPresent() ) {
 				
-				if( user.get().getRole() != "offer" )
-					return new ResponseEntity<>(returnJsonString(false,"This user is not authorized to create the offer"), HttpStatus.NOT_ACCEPTABLE);
-				
 				if( offer.getData() != null && offer.getTitle() != null ) {
 					if( offer.getCreated_at() != null ) {
 						offer.setUser_id(user.get());
