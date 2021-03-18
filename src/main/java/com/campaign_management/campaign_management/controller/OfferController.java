@@ -1,5 +1,6 @@
 package com.campaign_management.campaign_management.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,54 @@ public class OfferController {
 			return new ResponseEntity<List<Offer>>(offers, HttpStatus.OK);
 		}
 		else
-			return new ResponseEntity<>(returnJsonString(false,"No offers available"), HttpStatus.NOT_FOUND);	
+			return new ResponseEntity<>(returnJsonString(false,"No offers available"), HttpStatus.OK);	
+	}
+	
+	@RequestMapping("/notScheduledOffer")
+	public ResponseEntity<?> getNonScheduledOffer() throws Exception {
+		try {
+
+			Optional<List<Offer>> nonScheduledOffers = offerRepository.findNonSchduledOffers();
+			
+			if( nonScheduledOffers.isPresent() ) {
+				List<JSONObject> jsonObject = new ArrayList<JSONObject>();
+				
+				for(Offer nonSchedules: nonScheduledOffers.get()) {
+					
+					JSONObject jsonObjectOffer = new JSONObject();
+					JSONObject jsonObjectUser = new JSONObject();
+					
+					jsonObjectOffer.put("offer_id",nonSchedules.getOffer_id());
+					jsonObjectOffer.put("created_at",nonSchedules.getCreated_at());
+					jsonObjectOffer.put("status",nonSchedules.getStatus());
+					jsonObjectOffer.put("title",nonSchedules.getTitle());
+					jsonObjectOffer.put("data",nonSchedules.getData());
+					jsonObjectOffer.put("schedule_at","");
+					jsonObjectUser.put("id",nonSchedules.getUser_id().getId());
+					jsonObjectUser.put("dob",nonSchedules.getUser_id().getDOB());
+					jsonObjectUser.put("email",nonSchedules.getUser_id().getEmail());
+					jsonObjectUser.put("image", nonSchedules.getUser_id().getImage());
+					jsonObjectUser.put("name", nonSchedules.getUser_id().getName());
+					jsonObjectUser.put("phone", nonSchedules.getUser_id().getPhone());
+					jsonObjectUser.put("password", nonSchedules.getUser_id().getPassword());
+					jsonObjectUser.put("role",nonSchedules.getUser_id().getRole());
+					jsonObjectUser.put("enabled", nonSchedules.getUser_id().getEnabled());
+					jsonObjectUser.put("verificationCode",nonSchedules.getUser_id().getVerificationCode());
+					jsonObjectUser.put("mbverify", nonSchedules.getUser_id().getMbVerify());
+					jsonObjectUser.put("gender", nonSchedules.getUser_id().getGender());
+					jsonObjectUser.put("otp", nonSchedules.getUser_id().getOtp());
+					jsonObjectUser.put("timestamp", nonSchedules.getUser_id().getTimestamp());
+					jsonObjectOffer.put("user_id",jsonObjectUser);
+					jsonObject.add(jsonObjectOffer);
+				}
+				return new ResponseEntity<> (jsonObject.toString(), HttpStatus.OK);
+			}
+			else
+				return new ResponseEntity<>(returnJsonString(false,"No offers available"), HttpStatus.OK);
+				
+		}catch (Exception e) {
+			return new ResponseEntity<>(returnJsonString(false, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
@@ -69,26 +117,29 @@ public class OfferController {
 					return new ResponseEntity<>(returnJsonString(false,"data should not be null"), HttpStatus.NOT_ACCEPTABLE);
 			}
 			else 
-				return new ResponseEntity<>(returnJsonString(false,"No users available for the requested user_id"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"No users available for the requested user_id"), HttpStatus.OK);
 			
 		}catch (Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
-	@RequestMapping(method=RequestMethod.PUT, value="/")
-	public ResponseEntity<?> updateOffer(@RequestBody Offer offer) throws Exception {
+	@RequestMapping(method=RequestMethod.PUT, value="/{id}")
+	public ResponseEntity<?> updateOffer(@RequestBody Offer offer,@PathVariable int id) throws Exception {
 
 		try {
-			Optional<Offer> isOfferPresent = offerRepository.findById(offer.getOffer_id());
+			Optional<Offer> isOfferPresent = offerRepository.findById(id);
 			
 			if( !isOfferPresent.isPresent() )
-				return new ResponseEntity<>(returnJsonString(false,"No offer available for the requested offer_id"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"No offer available for the requested offer_id"), HttpStatus.OK);
 			
 			Offer offerFetched = isOfferPresent.get();
 			
 			if( offerFetched.getStatus().equalsIgnoreCase("sent") )
-				return new ResponseEntity<>(returnJsonString(false,"Offer cannot be update because it is already sent"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"Offer cannot be update because it is already sent"), HttpStatus.OK);
+			
+			
+			offer.setOffer_id(offerFetched.getOffer_id());
 			
 			if( offer.getCreated_at() == null )
 				offer.setCreated_at(offerFetched.getCreated_at());

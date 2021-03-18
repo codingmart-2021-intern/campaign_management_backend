@@ -33,7 +33,7 @@ public class Offer {
 	@Column(name="offer_id")
 	private int offer_id;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name="created_at")
 	private Date created_at;
 	

@@ -1,8 +1,6 @@
 package com.campaign_management.campaign_management.controller;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +45,7 @@ public class ScheduleController {
 		if( schedule.size() > 0 )
 			return new ResponseEntity<List<Schedule>> (schedule, HttpStatus.OK);
 		else
-			return new ResponseEntity<>(returnJsonString(false,"No schedules found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(returnJsonString(false,"No schedules found"), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value="/{user_id}/{offer_id}")
@@ -72,10 +70,10 @@ public class ScheduleController {
 						return new ResponseEntity<>(returnJsonString(false,"schedule_at should not be null"), HttpStatus.NOT_ACCEPTABLE);
 				}
 				else
-					return new ResponseEntity<>(returnJsonString(false,"No offers found with that offer_id"), HttpStatus.NOT_FOUND);
+					return new ResponseEntity<>(returnJsonString(false,"No offers found with that offer_id"), HttpStatus.OK);
 			}
 			else
-				return new ResponseEntity<>(returnJsonString(false,"No users found with that user_id"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(returnJsonString(false,"No users found with that user_id"), HttpStatus.OK);
 		}catch (Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -83,13 +81,10 @@ public class ScheduleController {
 		
 	}
 	
-	@RequestMapping(method=RequestMethod.PUT, value="/update/{user_id}/{offer_id}/{previous_data}")
-	public ResponseEntity<?> updateSchedule(@RequestBody Schedule schedule, @PathVariable String previous_data, @PathVariable int user_id, @PathVariable int offer_id) throws Exception  {
+	@RequestMapping(method=RequestMethod.PUT, value="/update/{user_id}/{offer_id}/{id}")
+	public ResponseEntity<?> updateSchedule(@RequestBody Schedule schedule, @PathVariable int id, @PathVariable int user_id, @PathVariable int offer_id) throws Exception  {
 
 		try {
-			
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date date = df.parse(previous_data);
 			
 			Optional<User> user = userRepository.findById(user_id);
 			Optional<Offer> offer = offerRepository.findById(offer_id);
@@ -106,7 +101,7 @@ public class ScheduleController {
 					if( offerRepository.findById(offer_id).get().getStatus() == "sent" )
 						return new ResponseEntity<>(returnJsonString(false,"Updating schedule is not possible because it is already scheduled"), HttpStatus.NOT_ACCEPTABLE);
 					
-					Optional<Schedule> isSchedulePresent = scheduleRepository.findById(date);
+					Optional<Schedule> isSchedulePresent = scheduleRepository.findById(id);
 					
 					if( !isSchedulePresent.isPresent() )
 						return new ResponseEntity<>(returnJsonString(false,"Schedule is not available"), HttpStatus.NOT_ACCEPTABLE);
@@ -115,10 +110,10 @@ public class ScheduleController {
 					
 					if( schedule.getUser_id() == null )
 						schedule.setUser_id(scheduleFetched.getUser_id());
-	
-					schedule.setOffer_id(offer.get());
-					schedule.setUser_id(user.get());
-					scheduleRepository.deleteById(date);
+					if( schedule.getOffer_id() == null )
+						schedule.setOffer_id(scheduleFetched.getOffer_id());
+					
+					schedule.setSchedule_id(id);
 					scheduleRepository.save(schedule);
 					
 					return new ResponseEntity<Schedule> (schedule, HttpStatus.OK);
@@ -127,35 +122,33 @@ public class ScheduleController {
 					return new ResponseEntity<>(returnJsonString(false,"No offers found with that offer_id"), HttpStatus.NOT_FOUND);
 			}
 			else
-				return new ResponseEntity<>(returnJsonString(false,"No schedules found"), HttpStatus.NOT_FOUND);
-		} catch (ParseException e) {
+				return new ResponseEntity<>(returnJsonString(false,"No schedules found"), HttpStatus.OK);
+		} catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 	}
 	
-	@RequestMapping(method=RequestMethod.DELETE, value="/delete/{user_id}/{offer_id}/{previous_data}")
-	public ResponseEntity<?> deleteSchedule(@PathVariable String previous_data, @PathVariable int user_id, @PathVariable int offer_id) throws Exception  {
+	@RequestMapping(method=RequestMethod.DELETE, value="/delete/{user_id}/{offer_id}/{id}")
+	public ResponseEntity<?> deleteSchedule(@PathVariable int id, @PathVariable int user_id, @PathVariable int offer_id) throws Exception  {
 		
 		try {
 			
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date date = df.parse(previous_data);
 			
 			if( offerRepository.findById(offer_id).get().getStatus() == "sent" )
 				return new ResponseEntity<>(returnJsonString(false,"Deleting schedule is not possible because it is already scheduled"), HttpStatus.NOT_ACCEPTABLE);
 			
-			Optional<Schedule> isSchedulePresent = scheduleRepository.findById(date);
+			Optional<Schedule> isSchedulePresent = scheduleRepository.findById(id);
 			
 			if( !isSchedulePresent.isPresent() )
 				return new ResponseEntity<>(returnJsonString(false,"Schedule is not available to delete"), HttpStatus.NOT_ACCEPTABLE);
 			
 			Schedule schedule = isSchedulePresent.get();
 			
-			scheduleRepository.deleteById(date);
+			scheduleRepository.deleteById(id);
 			return new ResponseEntity<Schedule> (schedule, HttpStatus.OK);
 			
-		} catch (ParseException e) {
+		} catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

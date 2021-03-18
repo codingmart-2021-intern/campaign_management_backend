@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -25,7 +27,12 @@ import lombok.ToString;
 @Entity
 @Table(name="schedule")
 public class Schedule {
-	
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="schedule_id")
+	private int schedule_id;
+
 	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@OneToOne(fetch = FetchType.EAGER, targetEntity=Offer.class)
 	@JoinColumn(name="offer_id")
@@ -36,11 +43,18 @@ public class Schedule {
 	@JoinColumn(name="user_id")
 	private User user_id;
 	
-	@Id
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name="scheduled_at")
 	private Date scheduled_at;
+	
+	public int getSchedule_id() {
+		return schedule_id;
+	}
 
+	public void setSchedule_id(int schedule_id) {
+		this.schedule_id = schedule_id;
+	}
+	
 	public Date getScheduled_at() {
 		return scheduled_at;
 	}
