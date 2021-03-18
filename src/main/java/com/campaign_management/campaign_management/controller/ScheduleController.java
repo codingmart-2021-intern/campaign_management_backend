@@ -55,9 +55,6 @@ public class ScheduleController {
 			
 			if( user.isPresent() ) {
 				
-				if( user.get().getRole() != "schedule" )
-					return new ResponseEntity<>(returnJsonString(false,"This user is not authorized to schedule offers"), HttpStatus.NOT_ACCEPTABLE);
-				
 				if( offer.isPresent() ) {
 					
 					if( schedule.getScheduled_at() != null ) {
