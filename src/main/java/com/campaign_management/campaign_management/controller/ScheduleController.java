@@ -3,7 +3,6 @@ package com.campaign_management.campaign_management.controller;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.campaign_management.campaign_management.repository.UserRepository;
 import com.campaign_management.campaign_management.model.Offer;
 import com.campaign_management.campaign_management.model.Schedule;

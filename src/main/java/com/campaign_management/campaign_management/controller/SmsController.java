@@ -5,8 +5,6 @@ import com.campaign_management.campaign_management.model.SmsModel;
 import com.campaign_management.campaign_management.service.SmsService;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,14 +20,14 @@ public class SmsController {
     @Autowired
     private SmsService smsService;
 
-    @PostMapping(value = "/generateOtp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> sendSms(@RequestBody SmsModel data) throws JSONException {
-        return new ResponseEntity<>(smsService.sendSms(data), HttpStatus.OK);
+    @PostMapping(value = "/generateOtp")
+    public ResponseEntity<?> sendSms(@RequestBody SmsModel data) throws JSONException {
+        return smsService.sendSms(data);
     }
 
-    @PostMapping(value = "/verifyPhoneNumber", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> smsOtpVerification(@RequestBody SMSOtpVefication data) throws Exception {
-        return new ResponseEntity<>(smsService.smsOtpVerification(data), HttpStatus.OK);
+    @PostMapping(value = "/verifyPhoneNumber")
+    public ResponseEntity<?> smsOtpVerification(@RequestBody SMSOtpVefication data) throws Exception {
+        return smsService.smsOtpVerification(data);
     }
 
 }
