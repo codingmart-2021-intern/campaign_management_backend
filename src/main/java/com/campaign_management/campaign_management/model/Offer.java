@@ -40,6 +40,9 @@ public class Offer {
 	@Column(name="status")
 	private String status;
 	
+	@Column(name="category")
+	private String category;
+
 	@Column(name="data")
 	private String data;
 
@@ -73,6 +76,14 @@ public class Offer {
 
 	public void setCreated_at(Date created_at) {
 		this.created_at = created_at;
+	}
+	
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 	
 	public String getData() {
