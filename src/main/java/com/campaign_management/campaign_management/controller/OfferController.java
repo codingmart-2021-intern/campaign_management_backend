@@ -104,6 +104,9 @@ public class OfferController {
 			
 			if( user.isPresent() ) {
 				
+				if( user.get().getRole() != "offer" )
+					return new ResponseEntity<>(returnJsonString(false,"This user is not authorized to create the offer"), HttpStatus.NOT_ACCEPTABLE);
+				
 				if( offer.getData() != null && offer.getTitle() != null ) {
 					if( offer.getCreated_at() != null ) {
 						offer.setUser_id(user.get());
@@ -114,7 +117,7 @@ public class OfferController {
 						return new ResponseEntity<>(returnJsonString(false,"created_at should not be null"), HttpStatus.NOT_ACCEPTABLE);
 				}
 				else
-					return new ResponseEntity<>(returnJsonString(false,"data should not be null"), HttpStatus.NOT_ACCEPTABLE);
+					return new ResponseEntity<>(returnJsonString(false,"data and title should not be null"), HttpStatus.NOT_ACCEPTABLE);
 			}
 			else 
 				return new ResponseEntity<>(returnJsonString(false,"No users available for the requested user_id"), HttpStatus.OK);
