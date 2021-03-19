@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.campaign_management.campaign_management.model.Offer;
 import com.campaign_management.campaign_management.repository.OfferRepository;
+import com.campaign_management.campaign_management.model.Schedule;
 import com.campaign_management.campaign_management.repository.ScheduleRepository;
 import com.campaign_management.campaign_management.repository.UserRepository;
 import com.campaign_management.campaign_management.model.User;
@@ -175,12 +176,13 @@ public class OfferController {
 			if( !isOfferPresent.isPresent() )
 				return new ResponseEntity<>(returnJsonString(false,"No data available for that id to delete offer"), HttpStatus.NOT_ACCEPTABLE);
 			
-			if( scheduleRepository.findOneScheduleOfferId(id).isPresent() )
+			Optional<Schedule> isSchedulePresent = scheduleRepository.findById(id);
+			if( isSchedulePresent.isPresent() )
 				return new ResponseEntity<>(returnJsonString(false,"It is already scheduled so deletion is not possible"), HttpStatus.NOT_ACCEPTABLE);
 			
 			offerRepository.deleteById(id);
 			
-			return new ResponseEntity<>(returnJsonString(false,"Deleted offer with id = "+id), HttpStatus.OK);
+			return new ResponseEntity<>(returnJsonString(true,"Deleted offer with id = "+id), HttpStatus.OK);
 		}
 		catch (Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
