@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <title>Campaign management</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+
+    <style>
+        .check {
+            border: 2px solid #38CC77;
+            display: inline-block;
+            border-radius: 50%;
+        }
+
+        .bx {
+            font-size: 100px;
+            color: #6EC72D;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .text {
+            max-width: 90%;
+            margin: auto;
+        }
+
+        @media (max-width:500px) {
+            .message {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+            }
+
+            .lead {
+                font-size: 15px;
+            }
+
+            .para {
+                font-size: 12px;
+            }
+
+            .bx {
+                font-size: 80px;
+            }
+
+            .btn{
+                padding: 8px 5px;
+            }
+
+
+        }
+    </style>
+
+
+
+</head>
+
+
+<body>
+
+    <div class="container message text-center p-5">
+        <div class="check">
+            <i class='bx bx-check'></i>
+        </div>
+        <div class="text">
+            <p class="lead text-capitalize mt-3">Hey Rahul your Verification has been successfully done and your data
+                has been stored in our
+                database</p>
+            <p class="text-capitalize para text-muted">please click the below button to continue with login</p>
+            <a class="btn btn-success btn-lg px-5 "
+                href="https://campaign-management-frontend-hp8nop9sw-codingmart-intern-2021.vercel.app/login">Login</a>
+        </div>
+    </div>
+
+</body>
+
+</html>
