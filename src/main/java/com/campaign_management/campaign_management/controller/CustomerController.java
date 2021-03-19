@@ -45,7 +45,7 @@ public class CustomerController {
 		try {
 			
 			customerRepository.saveAll(customers);
-			return new ResponseEntity<>(returnJsonString(false,"Inserted successfully"), HttpStatus.OK);
+			return new ResponseEntity<>(returnJsonString(true,"Inserted successfully"), HttpStatus.OK);
 		}catch(Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}

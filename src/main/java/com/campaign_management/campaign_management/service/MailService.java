@@ -15,7 +15,7 @@ import java.io.IOException;
 @Service
 public class MailService {
     
-      public static Boolean sendMail(JSONObject mailData) throws IOException, JSONException {
+      public static Boolean sendGridMail(JSONObject mailData) throws IOException, JSONException {
         
         Email from = new Email("balaji@codingmart.com");
         String subject = mailData.get("subject").toString();
@@ -26,22 +26,14 @@ public class MailService {
     
 //        SendGrid sg = new SendGrid("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");
         SendGrid sg = new SendGrid("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");
-        System.out.println("EMAIL ___");
-        System.out.println(System.getenv("SENDGRID_API_KEY"));
         Request request = new Request();
           request.setMethod(Method.POST);
           request.setEndpoint("mail/send");
           request.setBody(mail.build());
           Response response = sg.api(request);
           if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
             return true;
           }
-          System.out.println(response.getStatusCode());
-          System.out.println(response.getBody());
-          System.out.println(response.getHeaders());
           return false;
       }
     
