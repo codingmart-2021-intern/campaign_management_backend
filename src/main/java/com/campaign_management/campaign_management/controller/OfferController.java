@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.campaign_management.campaign_management.model.Offer;
+import com.campaign_management.campaign_management.model.Schedule;
 import com.campaign_management.campaign_management.repository.OfferRepository;
 import com.campaign_management.campaign_management.repository.ScheduleRepository;
 import com.campaign_management.campaign_management.repository.UserRepository;
@@ -35,12 +36,13 @@ public class OfferController {
 	
 	@Autowired
 	private ScheduleRepository scheduleRepository;
-	
+
+//	Get all offers
 	@RequestMapping("/")
 	public ResponseEntity<?> getOffer() throws Exception  {
 		
 		List<Offer> offers = offerRepository.findAll();
-		
+		System.out.println("Offers all");
 		if( offers.size() > 0 ) {
 			return new ResponseEntity<List<Offer>>(offers, HttpStatus.OK);
 		}
@@ -48,6 +50,7 @@ public class OfferController {
 			return new ResponseEntity<>(returnJsonString(false,"No offers available"), HttpStatus.OK);	
 	}
 	
+//	Get Non scheduled offers
 	@RequestMapping("/notScheduledOffer")
 	public ResponseEntity<?> getNonScheduledOffer() throws Exception {
 		try {
@@ -95,6 +98,7 @@ public class OfferController {
 		}
 	}
 	
+//	Add an offer
 	@RequestMapping(method=RequestMethod.POST, value="/{id}")
 	public ResponseEntity<?> addOffer(@RequestBody Offer offer,@PathVariable int id) throws Exception {
 		
@@ -124,6 +128,7 @@ public class OfferController {
 		}
 	}
 	
+//	Update an offer
 	@RequestMapping(method=RequestMethod.PUT, value="/{id}")
 	public ResponseEntity<?> updateOffer(@RequestBody Offer offer,@PathVariable int id) throws Exception {
 
@@ -167,6 +172,7 @@ public class OfferController {
 		}
 	}
 	
+//	Delete an offer
 	@RequestMapping(method=RequestMethod.DELETE, value="/{id}")
 	public ResponseEntity<?> deleteOffer(@PathVariable int id) throws Exception {
 		try {
@@ -175,18 +181,20 @@ public class OfferController {
 			if( !isOfferPresent.isPresent() )
 				return new ResponseEntity<>(returnJsonString(false,"No data available for that id to delete offer"), HttpStatus.NOT_ACCEPTABLE);
 			
-			if( scheduleRepository.findOneScheduleOfferId(id).isPresent() )
+			Optional<Schedule> isSchedulePresent = scheduleRepository.findById(id);
+			if( isSchedulePresent.isPresent() )
 				return new ResponseEntity<>(returnJsonString(false,"It is already scheduled so deletion is not possible"), HttpStatus.NOT_ACCEPTABLE);
 			
 			offerRepository.deleteById(id);
 			
-			return new ResponseEntity<>(returnJsonString(false,"Deleted offer with id = "+id), HttpStatus.OK);
+			return new ResponseEntity<>(returnJsonString(true,"Deleted offer with id = "+id), HttpStatus.OK);
 		}
 		catch (Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
+//	JSON return message
 	public String returnJsonString(boolean status, String response) throws JSONException  {
 		JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", status);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
+import com.campaign_management.campaign_management.config.sendgrid.SendGridConfig;
 import com.campaign_management.campaign_management.model.EmailModel;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
@@ -55,6 +56,9 @@ public class UserController {
 
     @Autowired
     private UserServiceImpl userServiceImpl;
+
+	@Autowired
+	private SendGridConfig sendGridConfig;
 
     // Login AUTHENTICATE..
     @PostMapping(value = "/authenticate")
@@ -195,7 +199,7 @@ public class UserController {
         emailObj.put("content", mailData.getContent());
         emailObj.put("senderName", mailData.getSenderName());
 
-        Boolean status = MailService.sendMail(emailObj);
+        Boolean status = MailService.sendMail(emailObj,sendGridConfig.getSendGridAPIKey());
         if (status == true) {
             return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),
                     HttpStatus.OK);
