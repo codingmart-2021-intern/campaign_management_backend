@@ -191,12 +191,12 @@ public class UserServiceImpl implements UserService {
                 + "</div>" + "Thank you,<br>";
 
         content = content.replace("[[name]]", user.getName());
-        // String verifyURL =
-        // "https://campaign-management-sb-backend.herokuapp.com/rest" +
-        // "/api/v1/user/verify?code="
-        // + user.getVerificationCode();
+        String verifyURL =
+        "https://campaign-management-sb-backend.herokuapp.com/rest" +
+        "/api/v1/user/verify?code="
+        + user.getVerificationCode();
 
-        String verifyURL = "http://localhost:3001/rest/api/v1/user/verify?code=" + user.getVerificationCode();
+        // String verifyURL = "http://localhost:3001/rest/api/v1/user/verify?code=" + user.getVerificationCode();
 
         content = content.replace("[[URL]]", verifyURL);
 
