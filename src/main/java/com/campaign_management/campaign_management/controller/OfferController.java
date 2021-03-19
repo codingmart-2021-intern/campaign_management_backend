@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.campaign_management.campaign_management.model.Offer;
 import com.campaign_management.campaign_management.repository.OfferRepository;
+import com.campaign_management.campaign_management.model.Schedule;
 import com.campaign_management.campaign_management.repository.ScheduleRepository;
 import com.campaign_management.campaign_management.repository.UserRepository;
 import com.campaign_management.campaign_management.model.User;
