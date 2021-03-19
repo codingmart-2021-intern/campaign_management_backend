@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -121,13 +122,13 @@ public class UserController {
             return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation success"), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation error"), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "validation error"), HttpStatus.FORBIDDEN);
     }
 
     // email verification
     @GetMapping(value = "/verify")
-    public ResponseEntity<?> verifyMail(@Param("code") String code) throws JSONException {
-        return userService.checkEmailVerification(code);
+    public String verifyMail(@Param("code") String code,Model model) throws JSONException {
+        return userService.checkEmailVerification(code,model);
     }
 
     // reset forgot password (requesting for otp)

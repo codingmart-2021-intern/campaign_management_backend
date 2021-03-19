@@ -7,6 +7,7 @@ import com.campaign_management.campaign_management.model.User;
 
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 
 public interface UserService {
 
@@ -18,7 +19,7 @@ public interface UserService {
 
     ResponseEntity<?> deleteData(int id) throws JSONException;
 
-    ResponseEntity<?> checkEmailVerification(String code) throws JSONException;
+    String checkEmailVerification(String code,Model model) throws JSONException;
 
     ResponseEntity<?> forgotPassword(ForgotPassword data) throws Exception;
 

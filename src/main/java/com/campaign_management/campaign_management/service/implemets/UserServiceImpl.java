@@ -18,6 +18,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+
 import net.bytebuddy.utility.RandomString;
 // import com.campaign_management.campaign_management.service.MailService;
 
@@ -97,14 +99,16 @@ public class UserServiceImpl implements UserService {
 
     // check email verification
     @Override
-    public ResponseEntity<?> checkEmailVerification(String code) throws JSONException {
+    public String checkEmailVerification(String code, Model model) throws JSONException {
         User res_data = userRepository.findByVerificationCode(code);
+
         if (res_data != null) {
             res_data.setEnabled(true);
             userRepository.save(res_data);
-            return new ResponseEntity<>(returnJsonString(true, "verified"), HttpStatus.OK);
+            model.addAttribute("username", res_data.getName());
+            return "emailverification";
         }
-        return new ResponseEntity<>(returnJsonString(false, "Not verified sorry!!"), HttpStatus.FORBIDDEN);
+        return "emailverification";
     }
 
     // forgot password
@@ -128,7 +132,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(res_data);
         sendForgotPasswordEmail(email, otp);
 
-        return new ResponseEntity<>(returnJsonString(true, "OTP send to the Email please check spam too !!"), HttpStatus.OK);
+        return new ResponseEntity<>(returnJsonString(true, "OTP send to the Email please check spam too !!"),
+                HttpStatus.OK);
     }
 
     // otp verification
