@@ -192,7 +192,7 @@ public class ScheduleController {
 			String send = formatter.format(schedule.getScheduled_at());
 			
 			
-			if( schedule.getOffer_id().getStatus().compareTo("schedule") == 0 && send.equalsIgnoreCase(date)) {
+			if( schedule.getOffer_id().getStatus().compareTo("scheduled") == 0 && send.equalsIgnoreCase(date)) {
 
 				List<Customer> customersList = customerRepository.findAll();
 				
