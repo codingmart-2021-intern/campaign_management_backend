@@ -4,10 +4,8 @@ import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
 import com.campaign_management.campaign_management.model.User;
-
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 
 public interface UserService {
 
@@ -19,7 +17,7 @@ public interface UserService {
 
     ResponseEntity<?> deleteData(int id) throws JSONException;
 
-    String checkEmailVerification(String code,Model model) throws JSONException;
+    User checkEmailVerification(String code) throws JSONException;
 
     ResponseEntity<?> forgotPassword(ForgotPassword data) throws Exception;
 

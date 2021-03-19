@@ -18,10 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-
 import net.bytebuddy.utility.RandomString;
-// import com.campaign_management.campaign_management.service.MailService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // find user by d
+    // find user by id
     @Override
     public ResponseEntity<User> findById(int id) {
         User res_data = userRepository.findById(id).get();
@@ -58,7 +55,7 @@ public class UserServiceImpl implements UserService {
             user.setMbverify(false);
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
             sendVerificationEmail(user);
-            userRepository.save(user);
+            // userRepository.save(user);
             return new ResponseEntity<>(returnJsonString(true, "SignIn success please check the mail for verification"),
                     HttpStatus.CREATED);
         }
@@ -99,16 +96,15 @@ public class UserServiceImpl implements UserService {
 
     // check email verification
     @Override
-    public String checkEmailVerification(String code, Model model) throws JSONException {
+    public User checkEmailVerification(String code) throws JSONException {
         User res_data = userRepository.findByVerificationCode(code);
 
         if (res_data != null) {
             res_data.setEnabled(true);
             userRepository.save(res_data);
-            model.addAttribute("username", res_data.getName());
-            return "emailverification";
+            return res_data;
         }
-        return "emailverification";
+        return null;
     }
 
     // forgot password
@@ -186,12 +182,22 @@ public class UserServiceImpl implements UserService {
         String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "CAMPAIGN_MANAGEMENT";
         String subject = "Please verify your registration";
-        String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
-                + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
+        String content = "<div style='padding: 10px 20px;'>"
+                + "<img src='https://firebasestorage.googleapis.com/v0/b/react-spring-boot-user-profile.appspot.com/o/images%2Flogo1.ico?alt=media&token=511d4ae0-a523-483d-9943-ba4cd9a6227c'  width='25' height='25' alt='logo'> <span style='font-style:15px'>Campaign Management</span>  <br>"
+                + "<h1 style='text-transform: capitalize;'>verify your email</h1>"
+                + "<p style='color: #676461;margin: 25px 0;'>Hi [[name]] ! Use the link below to verify your email and start enjoying Campaign Management </p>"
+                + "<a style='text-decoration: none; background-color: #1B98F5; color: #fff; padding: 12px 22px;border-radius: 5px; font-weight: 750; letter-spacing: 0.1rem;' href=\"[[URL]]\" target=\"_self\">Verify email</a>"
+                + "<p style='font-size: 15px; margin-top: 25px;'>Questions ? Email us at <span style='color: #1B98F5;font-style: italic;'>campaignmanagement.noreply@gmail.com</span></p>"
+                + "</div>" + "Thank you,<br>";
 
         content = content.replace("[[name]]", user.getName());
-        String verifyURL = "https://campaign-management-sb-backend.herokuapp.com/rest" + "/api/v1/user/verify?code="
-                + user.getVerificationCode();
+        // String verifyURL =
+        // "https://campaign-management-sb-backend.herokuapp.com/rest" +
+        // "/api/v1/user/verify?code="
+        // + user.getVerificationCode();
+
+        String verifyURL = "http://localhost:3001/rest/api/v1/user/verify?code=" + user.getVerificationCode();
+
         content = content.replace("[[URL]]", verifyURL);
 
         JSONObject obj = new JSONObject();
