@@ -62,7 +62,7 @@ public class UserController {
 
     // Login AUTHENTICATE..
     @PostMapping(value = "/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody User user) throws Exception {
+    public ResponseEntity<String> authenticate(@RequestBody User user, HttpServletRequest request) throws Exception {
         log.info("UserResourceImpl : authenticate");
 
         JSONObject jsonObject = new JSONObject();
@@ -97,6 +97,8 @@ public class UserController {
             jsonObject.put("gender", user_data.getGender());
             jsonObject.put("token", tokenProvider.createToken(email, user_data.getRole()));
 
+            String deviceDetails = request.getHeader("User-Agent");
+            userServiceImpl.securityAlert(deviceDetails, user_data);
         } catch (JSONException e) {
             e.printStackTrace();
         }

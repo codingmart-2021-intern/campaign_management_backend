@@ -2,6 +2,8 @@ package com.campaign_management.campaign_management.service.implemets;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import javax.mail.internet.MimeMessage;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
@@ -252,6 +254,32 @@ public class UserServiceImpl implements UserService {
         jsonObject.put("status", status);
         jsonObject.put("message", response);
         return jsonObject.toString();
+    }
+
+    public String securityAlert(String deviceDetails, User user) throws JSONException{
+
+        String deviceName = "";
+
+        if (deviceDetails != null) {
+            deviceName = deviceDetails.split(" ")[1].replace(")","");
+        }
+        String toAddress = user.getEmail();
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
+        String senderName = "Campaign Management";
+        String subject = "Security Alert!";
+        String content = "<!DOCTYPE html> <html lang='en'> <head> <meta charset='UTF-8'> <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1.0'> <title>Security Alert</title> <style> * { margin: auto; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; } a { text-decoration: none; } li { list-style: none; } .main_container { background-color: #292c3d; padding-bottom: 5rem; text-align: center; } .container { width: 80%; margin: auto; } .logo { width: 3rem; margin: 1rem auto; } .white_box { width: 90%; min-height: 5rem; background-color: #fff; border-top-left-radius: 1rem; border-top-right-radius: 1rem; margin: auto; } .img_fluid { width: 100%; border-radius: 1rem; } .title_container { background-color: rgb(219, 3, 75); padding-top: 2rem; } .content_container { width: 90%; margin: auto; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; padding: 0 2rem; padding-bottom: 2rem; } .btn { padding: 1rem; color: #fff; background-color: #1E39D1; font-size: 1rem; border-radius: 0.5rem; width: 10rem; text-align: center; } .text_container { padding: 1rem 0rem; display: grid; text-align: start; color: #202020; } .title_Wrapper { width: 90%; margin: auto; } h1,h2,h3,h4,h5 { margin: 1rem 0; } .role { color: #1E39D1; font-weight: 600; font-size: 1.5rem; } p { margin: 1rem 0; } </style> </head> <body> <div class='main_container'> <div class='title_container'> <div class='title_wrapper'> <h1 align='center' style='color:#fff'>Campaign Management</h1> <div class='logo'> <img class='img_fluid' src='https://campaign-management-frontend.vercel.app/assets/images/logo1.png' alt='campaign_management'> </div> <div class='white_box'> </div> </div> </div> <div class='content_container'> <span style='font-size: 2rem;font-weight:700'>New Device signed in to</span style='font-size: large;'> <h3 style='color: #3b3b3c;'>" + toAddress + "</h3> <div class='text_container'> <h4>Hi "+ user.name +",</h4> <p style='padding-left: 1rem;'>Your Campaign Management Account was just signed in to from a new "+ deviceName + " device. You're getting this email to make sure that it was you.</p> <p style='padding-left: 1rem;'>If it is not you. Kindly Reset your password.</p> <h4>Device Info:</h4> <p style='padding-left: 1rem;'>"+ deviceDetails +"</p> </div> <a href='https://campaign-management-frontend.vercel.app/forgot-password'> <div class='btn'> Reset Password </div> </a> </div> </div> </body> </html>";
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("fromAddress", fromAddress);
+            obj.put("toAddress", toAddress);
+            obj.put("senderName", senderName);
+            obj.put("subject", subject);
+            obj.put("content", content);
+            sendMailer(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return returnJsonString(true, "Email sent ! ");
     }
 
 }
