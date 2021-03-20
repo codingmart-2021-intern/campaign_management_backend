@@ -24,7 +24,7 @@ public class verification {
         User res_data = userService.checkEmailVerification(code);
 
         if (res_data != null) {
-            httpServletResponse.setHeader("Location", "https://campaign-management-frontend-git-master-codingmart-intern-2021.vercel.app/emailverification/" + res_data.getName());
+            httpServletResponse.setHeader("Location", "https://campaign-management-frontend.vercel.app/emailverification/" + res_data.getName());
             httpServletResponse.setStatus(302);
         }
 
