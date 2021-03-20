@@ -180,7 +180,7 @@ public class ScheduleController {
 	}
 	
 //	Check schedule database for every three minutes to trigger mail
-	@Scheduled(fixedRate = 360000L)
+	@Scheduled(fixedRate = 43200000L)
 	void triggerEmail() throws Exception {
 		
 		List<Schedule> scheduledList = scheduleRepository.findAll();
@@ -191,12 +191,10 @@ public class ScheduleController {
 			String date= formatter.format(new Date());
 			String send = formatter.format(schedule.getScheduled_at());
 			
-			System.out.println("Scheduled");
-			
 			if( schedule.getOffer_id().getStatus().compareTo("scheduled") == 0 && send.equalsIgnoreCase(date)) {
 
 				List<Customer> customersList = customerRepository.findAll();
-				System.out.println("Customer");	
+				
 				for(Customer customer : customersList) {
 
 					Offer offer = schedule.getOffer_id();
@@ -208,8 +206,6 @@ public class ScheduleController {
 					mailData.put("subject", offer.getTitle());
 					String key = sendGridConfig.getSendGridAPIKey();
 					boolean sendmail = mailService.sendMail(mailData,key);
-					
-					System.out.println(sendmail);
 				}
 				
 				Optional<Offer> getOffer = offerRepository.findById(schedule.getOffer_id().getOffer_id());
