@@ -272,7 +272,9 @@ public class UserServiceImpl implements UserService {
         String deviceName = "";
 
         if (deviceDetails != null) {
-            deviceName = deviceDetails.split(" ")[1].replace(")","");
+            int i1 = deviceDetails.indexOf("(");
+		    int i2 = deviceDetails.indexOf(")");
+		    deviceName = deviceDetails.substring(i1,i2+1).split(";")[1].replace(")","").trim().split(" ")[0];
         }
         String toAddress = user.getEmail();
         String fromAddress = "campaignmanagement.noreply@gmail.com";

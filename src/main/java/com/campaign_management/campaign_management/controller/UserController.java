@@ -250,9 +250,9 @@ public class UserController {
 
     // invalid exception
     @GetMapping("/invalid")
-    public String invalid() {
+    public String invalid() throws JSONException {
         log.info("executing invalid");
-        return "{'message', 'SOMETHING WENT WRONG'}";
+        return userServiceImpl.returnJsonString(false, "Somthing went wrong");
     }
 
 }
