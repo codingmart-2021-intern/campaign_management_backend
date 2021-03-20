@@ -18,7 +18,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -127,14 +126,10 @@ public class UserController {
             return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation success"), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation error"), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "validation error"), HttpStatus.FORBIDDEN);
     }
 
-    // email verification
-    @GetMapping(value = "/verify")
-    public ResponseEntity<?> verifyMail(@Param("code") String code) throws JSONException {
-        return userService.checkEmailVerification(code);
-    }
+   
 
     // reset forgot password (requesting for otp)
     @PostMapping(value = "/forgotpassword/generate/otp")
