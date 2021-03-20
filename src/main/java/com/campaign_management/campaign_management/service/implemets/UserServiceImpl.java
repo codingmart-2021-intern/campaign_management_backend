@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
             user.setMbverify(false);
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
             sendVerificationEmail(user);
-            // userRepository.save(user);
+            userRepository.save(user);
             return new ResponseEntity<>(returnJsonString(true, "SignIn success please check the mail for verification"),
                     HttpStatus.CREATED);
         }
