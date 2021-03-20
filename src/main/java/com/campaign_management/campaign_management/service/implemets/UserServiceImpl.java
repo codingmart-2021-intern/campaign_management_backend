@@ -178,7 +178,7 @@ public class UserServiceImpl implements UserService {
     public void sendVerificationEmail(User user) throws Exception {
         String toAddress = user.getEmail();
         String fromAddress = "campaignmanagement.noreply@gmail.com";
-        String senderName = "CAMPAIGN_MANAGEMENT";
+        String senderName = "Campaign Management";
         String subject = "Please verify your registration";
         String content = "<div style='padding: 10px 20px;'>"
                 + "<img src='https://firebasestorage.googleapis.com/v0/b/react-spring-boot-user-profile.appspot.com/o/images%2Flogo1.ico?alt=media&token=511d4ae0-a523-483d-9943-ba4cd9a6227c'  width='25' height='25' alt='logo'> <span style='font-style:15px'>Campaign Management</span>  <br>"
@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService {
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
         String fromAddress = "campaignmanagement.noreply@gmail.com";
-        String senderName = "CAMPAIGN_MANAGEMENT";
+        String senderName = "Campaign Management";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
                 + "Thank you";
