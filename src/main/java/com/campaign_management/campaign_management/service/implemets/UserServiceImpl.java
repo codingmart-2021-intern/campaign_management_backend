@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
     public void sendVerificationEmail(User user) throws Exception {
         String toAddress = user.getEmail();
         String fromAddress = "campaignmanagement.noreply@gmail.com";
-        String senderName = "CAMPAIGN_MANAGEMENT";
+        String senderName = "Campaign Management";
         String subject = "Please verify your registration";
         String content = "Dear [[name]],<br>" + "Please click the link below to verify your registration:<br>"
                 + "<h2><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h2> <br>" + "Thank you,<br>";
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
     public void sendForgotPasswordEmail(String email, String otp) throws Exception {
         String toAddress = email;
         String fromAddress = "campaignmanagement.noreply@gmail.com";
-        String senderName = "CAMPAIGN_MANAGEMENT";
+        String senderName = "Campaign Management";
         String subject = "Otp for Forgot password";
         String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
                 + "Thank you";
