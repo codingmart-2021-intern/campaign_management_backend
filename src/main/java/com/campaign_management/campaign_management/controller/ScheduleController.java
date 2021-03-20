@@ -180,41 +180,41 @@ public class ScheduleController {
 	}
 	
 //	Check schedule database for every three minutes to trigger mail
-	@Scheduled(fixedRate = 43200000L)
-	void triggerEmail() throws Exception {
+// 	@Scheduled(fixedRate = 43200000L)
+// 	void triggerEmail() throws Exception {
 		
-		List<Schedule> scheduledList = scheduleRepository.findAll();
+// 		List<Schedule> scheduledList = scheduleRepository.findAll();
 
-		for(Schedule schedule : scheduledList) {
+// 		for(Schedule schedule : scheduledList) {
 			
-			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
-			String date= formatter.format(new Date());
-			String send = formatter.format(schedule.getScheduled_at());
+// 			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
+// 			String date= formatter.format(new Date());
+// 			String send = formatter.format(schedule.getScheduled_at());
 			
-			if( schedule.getOffer_id().getStatus().compareTo("scheduled") == 0 && send.equalsIgnoreCase(date)) {
+// 			if( schedule.getOffer_id().getStatus().compareTo("scheduled") == 0 && send.equalsIgnoreCase(date)) {
 
-				List<Customer> customersList = customerRepository.findAll();
+// 				List<Customer> customersList = customerRepository.findAll();
 				
-				for(Customer customer : customersList) {
+// 				for(Customer customer : customersList) {
 
-					Offer offer = schedule.getOffer_id();
-					JSONObject mailData = new JSONObject();
+// 					Offer offer = schedule.getOffer_id();
+// 					JSONObject mailData = new JSONObject();
 					
-					mailData.put("toAddress", customer.getCustomer_email());
-					mailData.put("senderName", "Campaign Management Newsletter");
-					mailData.put("content", offer.getData());
-					mailData.put("subject", offer.getTitle());
-					String key = sendGridConfig.getSendGridAPIKey();
-					boolean sendmail = mailService.sendMail(mailData,key);
-				}
+// 					mailData.put("toAddress", customer.getCustomer_email());
+// 					mailData.put("senderName", "Campaign Management Newsletter");
+// 					mailData.put("content", offer.getData());
+// 					mailData.put("subject", offer.getTitle());
+// 					String key = sendGridConfig.getSendGridAPIKey();
+// 					boolean sendmail = mailService.sendMail(mailData,key);
+// 				}
 				
-				Optional<Offer> getOffer = offerRepository.findById(schedule.getOffer_id().getOffer_id());
+// 				Optional<Offer> getOffer = offerRepository.findById(schedule.getOffer_id().getOffer_id());
 				
-				Offer updateOffer = getOffer.get();
+// 				Offer updateOffer = getOffer.get();
 				
-				updateOffer.setStatus("sent");
-				offerRepository.save(updateOffer);
-			}
-		}
-	}
+// 				updateOffer.setStatus("sent");
+// 				offerRepository.save(updateOffer);
+// 			}
+// 		}
+// 	}
 }
