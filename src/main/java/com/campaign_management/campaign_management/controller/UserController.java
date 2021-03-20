@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
+import com.campaign_management.campaign_management.config.sendgrid.SendGridConfig;
 import com.campaign_management.campaign_management.model.EmailModel;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
@@ -54,6 +55,9 @@ public class UserController {
 
     @Autowired
     private UserServiceImpl userServiceImpl;
+
+	@Autowired
+	private SendGridConfig sendGridConfig;
 
     // Login AUTHENTICATE..
     @PostMapping(value = "/authenticate")
@@ -156,12 +160,34 @@ public class UserController {
     // Change User role by admin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/admin")
-    public String updateData(@RequestBody List<User> users, HttpServletRequest request) throws Exception {
+    public ResponseEntity<String> updateData(@RequestBody List<User> users, HttpServletRequest request)
+            throws Exception {
 
-        users.forEach((user) -> userRepository.save(user));
-        // User responseData = userRepository.save(user);
+        users.forEach((user) -> {
+            User userDb = userRepository.findByEmail(user.getEmail());
 
-        return userServiceImpl.returnJsonString(true, "User role updated");
+            if (!userDb.role.equals(user.role)) {
+                // Notify User via Email
+                String toAddress = user.getEmail();
+                String fromAddress = "campaignmanagement.noreply@gmail.com";
+                String senderName = "Campaign Management";
+                String subject = "Your Role has been changed";
+                String content = "<!DOCTYPE html> <html lang='en'> <head> <meta charset='UTF-8'> <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1.0'> <title>Account Deleted</title> <style> * { margin: auto; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; } a { text-decoration: none; } li { list-style: none; } .main_container { background-color: #292c3d; padding-bottom: 5rem; text-align: center; } .container { width: 80%; margin: auto; } .logo { width: 3rem; margin: 1rem auto; } .white_box { width: 90%; min-height: 5rem; background-color: #fff; border-top-left-radius: 1rem; border-top-right-radius: 1rem; margin: auto; } .img_fluid { width: 100%; border-radius: 1rem; } .title_container { background-color: rgb(210, 2, 72); padding-top: 2rem; } .content_container { width: 90%; margin: auto; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; padding: 0 2rem; padding-bottom: 2rem; } .btn { padding: 1rem; color: #fff; background-color: #1E39D1; font-size: 1rem; border-radius: 0.5rem; width: 6rem; text-align: center; } .text_container { padding: 1rem 0rem; text-align: start; margin: auto; } .title_Wrapper { width: 90%; margin: auto; } h1,h3,h4,h5 { margin: 1rem 0; } .role { color: #1E39D1; font-weight: 600; font-size: 1.5rem; } </style> </head> <body> <div class='main_container'> <div class='title_container'> <div class='title_wrapper'> <h1 align='center'>Campaign Management</h1> <div class='logo'> <img class='img_fluid' src='https://campaign-management-frontend.vercel.app/assets/images/logo1.png' alt='campaign_management'> </div> <div class='white_box'> </div> </div> </div> <div class='content_container'> <h2>Hello " + user.name + "</h2> <div class='text_container'> <h2>Your role has been changed by Admin</h2> <h3>Current Role: <span class='role'>" + user.role.toUpperCase() + " Creation</span></h3> </div> <a href='https://campaign-management-frontend.vercel.app'> <div class='btn'> Visit site </div> </a> </div> </div> </body> </html>";
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("fromAddress", fromAddress);
+                    obj.put("toAddress", toAddress);
+                    obj.put("senderName", senderName);
+                    obj.put("subject", subject);
+                    obj.put("content", content);
+                    userServiceImpl.sendMailer(obj);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            userRepository.save(user);
+        });
+        return new ResponseEntity<String>(userServiceImpl.returnJsonString(true, "User Role Updated"), HttpStatus.OK);
     }
 
     // get only user not admin details
@@ -174,7 +200,26 @@ public class UserController {
     // deleting user details by admin
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteData(@PathVariable int id) throws JSONException {
+    public ResponseEntity<String> deleteData(@PathVariable int id) throws JSONException {
+        User user = userRepository.findByUserId(id);
+        
+        // Send Email to deleted User
+        String toAddress = user.getEmail();
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
+        String senderName = "Campaign Management";
+        String subject = "Account has been deleted";
+        String content = "<!DOCTYPE html> <html lang='en'> <head> <meta charset='UTF-8'> <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1.0'> <title>Account Deleted</title> <style> * { margin: auto; padding: 0; box-sizing: border-box; } a { text-decoration: none; } li { list-style: none; } .main_container { background-color: #292c3d; padding-bottom: 5rem; text-align: center; } .container { width: 80%; margin: auto; } .logo { width: 3rem; margin: 1rem auto; } .white_box { width: 90%; min-height: 5rem; background-color: #fff; border-top-left-radius: 1rem; border-top-right-radius: 1rem; margin: auto; } .img_fluid { width: 100%; border-radius: 1rem; } .title_container { background-color: rgb(210, 2, 72); padding-top: 2rem; } .content_container { width: 90%; margin: auto; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; padding: 0 2rem; padding-bottom: 2rem; } .btn { padding: 1rem; color: #fff; background-color: #1E39D1; font-size: 1rem; border-radius: 0.5rem; width: 6rem; text-align: center; } .text_container { padding: 1rem 0rem; text-align: start; margin: auto; } .title_Wrapper { width: 90%; margin: auto; } </style> </head> <body> <div class='main_container'> <div class='title_container'> <div class='title_wrapper'> <h1 align='center'>Campaign Management</h1> <div class='logo'> <img class='img_fluid' src='https://campaign-management-frontend.vercel.app/assets/images/logo1.png' alt='campaign_management'> </div> <div class='white_box'> </div> </div> </div> <div class='content_container'> <h2>Hello " + user.name + "</h2> <div class='text_container'> <h2>Your account has been deleted by Admin</h2> <p>Contact admin for any queries...</p> </div> <a href='https://campaign-management-frontend.vercel.app'> <div class='btn'> Visit site </div> </a> </div> </div> </body> </html>";
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("fromAddress", fromAddress);
+            obj.put("toAddress", toAddress);
+            obj.put("senderName", senderName);
+            obj.put("subject", subject);
+            obj.put("content", content);
+            userServiceImpl.sendMailer(obj);
+        } catch ( Exception e) {
+            e.printStackTrace();
+        }
         return userService.deleteData(id);
     }
 
@@ -190,7 +235,8 @@ public class UserController {
         emailObj.put("content", mailData.getContent());
         emailObj.put("senderName", mailData.getSenderName());
 
-        Boolean status = MailService.sendMail(emailObj);
+        Boolean status = MailService.sendMail(emailObj,sendGridConfig.getSendGridAPIKey());
+        
         if (status == true) {
             return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),
                     HttpStatus.OK);

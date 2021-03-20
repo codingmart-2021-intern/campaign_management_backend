@@ -24,6 +24,7 @@ public class CustomerController {
 	@Autowired
 	private CustomerRepository customerRepository;
 	
+//	Get all customers detail
 	@RequestMapping("/")
 	public ResponseEntity<?> getCustomers() throws Exception {
 		
@@ -35,6 +36,7 @@ public class CustomerController {
 			return new ResponseEntity<>(returnJsonString(false,"No customers available"), HttpStatus.OK);
 	}
 	
+//	Add customers details
 	@RequestMapping(method=RequestMethod.POST,value="/upload")
 	public ResponseEntity<?> addCustomers(@RequestBody List<Customer> customers) throws Exception {
 		
@@ -45,12 +47,13 @@ public class CustomerController {
 		try {
 			
 			customerRepository.saveAll(customers);
-			return new ResponseEntity<>(returnJsonString(false,"Inserted successfully"), HttpStatus.OK);
+			return new ResponseEntity<>(returnJsonString(true,"Inserted successfully"), HttpStatus.OK);
 		}catch(Exception e) {
 			return new ResponseEntity<>(returnJsonString(false,e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
+//	JSON return message
 	public String returnJsonString(boolean status, String response) throws JSONException  {
 		JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", status);

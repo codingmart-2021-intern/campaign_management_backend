@@ -83,15 +83,15 @@ public class UserServiceImpl implements UserService {
 
     // delete the data
     @Override
-    public ResponseEntity<?> deleteData(int id) throws JSONException {
+    public ResponseEntity<String> deleteData(int id) throws JSONException {
         try {
             userRepository.deleteById(id);
-            return new ResponseEntity<>(returnJsonString(true, "data deleted successfully"), HttpStatus.OK);
+            return new ResponseEntity<String>(returnJsonString(true, "User deleted successfully"), HttpStatus.OK);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return new ResponseEntity<>(returnJsonString(false, "data deleted failed"), HttpStatus.OK);
+        return new ResponseEntity<String>(returnJsonString(false, "User deletion failed"), HttpStatus.OK);
     }
 
     // check email verification
@@ -155,8 +155,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> changeNewPassword(SetNewPassword data) throws Exception {
         User res_data = userRepository.findByEmail(data.getEmail());
-
-        System.out.println();
 
         if (!new BCryptPasswordEncoder().matches(data.getOldPassword(), res_data.getPassword())) {
             return new ResponseEntity<>(returnJsonString(false, "old password was wrong"), HttpStatus.FORBIDDEN);

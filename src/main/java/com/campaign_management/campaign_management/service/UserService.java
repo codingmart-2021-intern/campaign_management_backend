@@ -15,7 +15,7 @@ public interface UserService {
 
     ResponseEntity<?> updateData(User user, int id) throws JSONException;
 
-    ResponseEntity<?> deleteData(int id) throws JSONException;
+    ResponseEntity<String> deleteData(int id) throws JSONException;
 
     User checkEmailVerification(String code) throws JSONException;
 

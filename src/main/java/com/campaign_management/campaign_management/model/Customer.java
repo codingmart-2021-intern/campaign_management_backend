@@ -20,10 +20,6 @@ import lombok.ToString;
 @Table(name="customer")
 public class Customer {
 
-//	@EmbeddedId
-//	private CompositeKeyCustomer compositeKeyCustomer;
-	
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="customer_id")
@@ -37,14 +33,6 @@ public class Customer {
 	
 	@Column(name="customer_phone")
 	private Long customer_phone;
-	
-//	public CompositeKeyCustomer getCompositeKeyCustomer() {
-//		return compositeKeyCustomer;
-//	}
-//
-//	public void setCompositeKeyCustomer(CompositeKeyCustomer compositeKeyCustomer) {
-//		this.compositeKeyCustomer = compositeKeyCustomer;
-//	}
 
 	public String getCustomer_name() {
 		return customer_name;
