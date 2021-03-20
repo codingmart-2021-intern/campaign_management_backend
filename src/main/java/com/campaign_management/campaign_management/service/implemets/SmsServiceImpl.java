@@ -11,6 +11,8 @@ import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.type.PhoneNumber;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,7 +28,7 @@ public class SmsServiceImpl implements SmsService {
     private UserRepository userRepository;
 
     @Override
-    public String sendSms(SmsModel smsRequest) throws JSONException {
+    public ResponseEntity<?> sendSms(SmsModel smsRequest) throws JSONException {
 
         String otp = userServiceImpl.generateOtp();
         String phone = smsRequest.getPhoneNumber().substring(3);
@@ -47,23 +49,27 @@ public class SmsServiceImpl implements SmsService {
             MessageCreator creator = Message.creator(to, from, message);
             creator.create();
         } catch (Exception e) {
-            throw new IllegalArgumentException("please enter the valid phone number");
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "please enter the valid phone number"),
+                    HttpStatus.FORBIDDEN);
         }
-        return userServiceImpl.returnJsonString(true, "OTP send to the registered phone number");
+        return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "OTP send to the registered phone number"),
+                HttpStatus.OK);
 
     }
 
     @Override
-    public String smsOtpVerification(SMSOtpVefication request) throws Exception {
+    public ResponseEntity<?> smsOtpVerification(SMSOtpVefication request) throws Exception {
 
         User res_data = userRepository.findByOtp(request.getOtp());
         if (res_data == null || !request.getOtp().equals(res_data.getOtp())) {
-            throw new Exception("Entered Otp was wrong!!");
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Entered Otp was wrong!!"),
+                    HttpStatus.FORBIDDEN);
         }
         userServiceImpl.verifyOtpValidation(res_data.getTimestamp());
         res_data.setMbverify(true);
         userRepository.save(res_data);
-        return userServiceImpl.returnJsonString(true, "your Mobile Number verified successfully!!");
+        return new ResponseEntity<>(
+                userServiceImpl.returnJsonString(true, "your Mobile Number verified successfully!!"), HttpStatus.OK);
     }
 
 }

@@ -1,24 +1,24 @@
 package com.campaign_management.campaign_management.controller;
 
+import java.io.IOException;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import com.campaign_management.campaign_management.config.jwt_configure.JwtTokenProvider;
+import com.campaign_management.campaign_management.config.sendgrid.SendGridConfig;
+import com.campaign_management.campaign_management.model.EmailModel;
 import com.campaign_management.campaign_management.model.ForgotPassword;
 import com.campaign_management.campaign_management.model.OtpVefication;
 import com.campaign_management.campaign_management.model.SetNewPassword;
 import com.campaign_management.campaign_management.model.User;
 import com.campaign_management.campaign_management.repository.UserRepository;
 import com.campaign_management.campaign_management.service.UserService;
-import com.campaign_management.campaign_management.service.Utility;
 import com.campaign_management.campaign_management.service.implemets.UserServiceImpl;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.campaign_management.campaign_management.service.MailService;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api/v1/user")
@@ -55,22 +56,31 @@ public class UserController {
     @Autowired
     private UserServiceImpl userServiceImpl;
 
-    // AUTHENTICATE..
+	@Autowired
+	private SendGridConfig sendGridConfig;
 
-    @PostMapping(value = "/authenticate", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> authenticate(@RequestBody User user) throws Exception {
+    // Login AUTHENTICATE..
+    @PostMapping(value = "/authenticate")
+    public ResponseEntity<String> authenticate(@RequestBody User user, HttpServletRequest request) throws Exception {
         log.info("UserResourceImpl : authenticate");
 
+        JSONObject jsonObject = new JSONObject();
+
         User res_data = userRepository.findByEmail(user.getEmail());
-        if (res_data != null) {
-            if (!res_data.getEnabled()) {
-                throw new Exception("Please verify the email to continue");
-            }
+
+        if (res_data == null) {
+            return new ResponseEntity<String>(
+                    userServiceImpl.returnJsonString(false, "your data is not found in database"),
+                    HttpStatus.NOT_FOUND);
+        }
+        if (!res_data.getEnabled()) {
+            return new ResponseEntity<String>(
+                    userServiceImpl.returnJsonString(false, "please verify the email to continue"),
+                    HttpStatus.NOT_ACCEPTABLE);
         }
 
         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        JSONObject jsonObject = new JSONObject();
         try {
             String email = user.getEmail();
 
@@ -86,104 +96,163 @@ public class UserController {
             jsonObject.put("gender", user_data.getGender());
             jsonObject.put("token", tokenProvider.createToken(email, user_data.getRole()));
 
+            String deviceDetails = request.getHeader("User-Agent");
+            userServiceImpl.securityAlert(deviceDetails, user_data);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return new ResponseEntity<String>(jsonObject.toString(), HttpStatus.OK);
     }
 
-
+    // get user details by id
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    public ResponseEntity<User> findById(@PathVariable int id) {
-        return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
+    public ResponseEntity<?> findById(@PathVariable int id) {
+        return userService.findById(id);
     }
 
-    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> addData(@RequestBody User user, HttpServletRequest request) throws Exception {
-
-        User responseData = userService.addData(user);
-
-        String url = Utility.getSiteURL(request);
-        userServiceImpl.sendVerificationEmail(user, url);
-
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+    // signup
+    @PostMapping(value = "/signup")
+    public ResponseEntity<?> addData(@RequestBody User user) throws Exception {
+        return userService.addData(user);
     }
 
-    // validation
-
+    // validation (checking token expires or not)
     @GetMapping(value = "/validate/{token}")
-    public ResponseEntity<Boolean> validate(@PathVariable String token) {
-        return new ResponseEntity<>(tokenProvider.validateToken(token), HttpStatus.OK);
+    public ResponseEntity<?> validate(@PathVariable String token) throws JSONException {
+
+        boolean res_data = tokenProvider.validateToken(token);
+        if (res_data) {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "validation success"), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "validation error"), HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping(value = "/verify")
-    public ResponseEntity<String> verifyMail(@Param("code") String code) throws JSONException {
-        return new ResponseEntity<>(userService.checkEmailVerification(code), HttpStatus.OK);
+   
+
+    // reset forgot password (requesting for otp)
+    @PostMapping(value = "/forgotpassword/generate/otp")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPassword data) throws Exception {
+        return userService.forgotPassword(data);
     }
 
-    // reset forgot password
-
-    @PostMapping(value = "/forgotpassword/generate/otp", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPassword data) throws Exception {
-        return new ResponseEntity<>(userService.forgotPassword(data), HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/forgotpassword/reset", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> resetPassword(@RequestBody OtpVefication data) throws Exception {
-        return new ResponseEntity<>(userService.otpVerification(data), HttpStatus.OK);
+    // otp verification
+    @PostMapping(value = "/forgotpassword/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody OtpVefication data) throws Exception {
+        return userService.otpVerification(data);
     }
 
     // changing new password..
-
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    @PostMapping(value = "/newpassword", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
-        return new ResponseEntity<>(userService.changeNewPassword(data), HttpStatus.OK);
+    @PostMapping(value = "/newpassword")
+    public ResponseEntity<?> changeNewPassword(@RequestBody SetNewPassword data) throws Exception {
+        return userService.changeNewPassword(data);
     }
 
     /* Role Assign */
 
-    // Change User Role By users
+    // Change User details By users (profile page)
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<User> updateData(@RequestBody User user, @PathVariable int id) {
-        return new ResponseEntity<>(userService.updateData(user, id), HttpStatus.OK);
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateData(@RequestBody User user, @PathVariable int id) throws JSONException {
+        return userService.updateData(user, id);
     }
 
-    // Change User Details by admin
+    // Change User role by admin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateData(@RequestBody List<User> users, HttpServletRequest request) throws Exception {
+    @PostMapping(value = "/admin")
+    public ResponseEntity<String> updateData(@RequestBody List<User> users, HttpServletRequest request)
+            throws Exception {
 
-        users.forEach((user) -> userRepository.save(user));
-        // User responseData = userRepository.save(user);
+        users.forEach((user) -> {
+            User userDb = userRepository.findByEmail(user.getEmail());
 
-        return userServiceImpl.returnJsonString(true, "Users role updated");
+            if (!userDb.role.equals(user.role)) {
+                // Notify User via Email
+                String toAddress = user.getEmail();
+                String fromAddress = "campaignmanagement.noreply@gmail.com";
+                String senderName = "Campaign Management";
+                String subject = "Your Role has been changed";
+                String content = "<!DOCTYPE html> <html lang='en'> <head> <meta charset='UTF-8'> <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1.0'> <title>Account Deleted</title> <style> * { margin: auto; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; } a { text-decoration: none; } li { list-style: none; } .main_container { background-color: #292c3d; padding-bottom: 5rem; text-align: center; } .container { width: 80%; margin: auto; } .logo { width: 3rem; margin: 1rem auto; } .white_box { width: 90%; min-height: 5rem; background-color: #fff; border-top-left-radius: 1rem; border-top-right-radius: 1rem; margin: auto; } .img_fluid { width: 100%; border-radius: 1rem; } .title_container { background-color: rgb(219, 3, 75); padding-top: 2rem; } .content_container { width: 90%; margin: auto; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; padding: 0 2rem; padding-bottom: 2rem; } .btn { padding: 1rem; color: #fff; background-color: #1E39D1; font-size: 1rem; border-radius: 0.5rem; width: 6rem; text-align: center; } .text_container { padding: 1rem 0rem; display: grid; } .title_Wrapper { width: 90%; margin: auto; } h1,h3,h4,h5 { margin: 1rem 0; } .role { color: #1E39D1; font-weight: 600; font-size: 1.5rem; } </style> </head> <body> <div class='main_container'> <div class='title_container'> <div class='title_wrapper'> <h1 align='center' style='color:#fff'>Campaign Management</h1> <div class='logo'> <img class='img_fluid' src='https://campaign-management-frontend.vercel.app/assets/images/logo1.png' alt='campaign_management'> </div> <div class='white_box'> </div> </div> </div> <div class='content_container'> <h2>Hi " + user.name + " !</h2> <div class='text_container'> <h3>Your role has been changed by Admin</h3> <h4>Current Role: <span class='role'>" + user.role.toUpperCase() + " Creation</span></h4> </div> <a href='https://campaign-management-frontend.vercel.app'> <div class='btn'> Visit site </div> </a> </div> </div> </body> </html>";
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("fromAddress", fromAddress);
+                    obj.put("toAddress", toAddress);
+                    obj.put("senderName", senderName);
+                    obj.put("subject", subject);
+                    obj.put("content", content);
+                    userServiceImpl.sendMailer(obj);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            userRepository.save(user);
+        });
+        return new ResponseEntity<String>(userServiceImpl.returnJsonString(true, "User Role Updated"), HttpStatus.OK);
     }
 
+    // get only user not admin details
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN') ")
     public List<User> getAllUsers() {
         return userRepository.findAllUsers();
     }
 
+    // deleting user details by admin
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteData(@PathVariable int id) {
-        return new ResponseEntity<>(userService.deleteData(id), HttpStatus.OK);
+    public ResponseEntity<String> deleteData(@PathVariable int id) throws JSONException {
+        User user = userRepository.findByUserId(id);
+        
+        // Send Email to deleted User
+        String toAddress = user.getEmail();
+        String fromAddress = "campaignmanagement.noreply@gmail.com";
+        String senderName = "Campaign Management";
+        String subject = "Account has been deleted";
+        String content = "<!DOCTYPE html> <html lang='en'> <head> <meta charset='UTF-8'> <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1.0'> <title>Account Deleted</title> <style> * { margin: auto; padding: 0; box-sizing: border-box; } a { text-decoration: none; } li { list-style: none; } .main_container { background-color: #292c3d; padding-bottom: 5rem; text-align: center; } .container { width: 80%; margin: auto; } .logo { width: 3rem; margin: 1rem auto; } .white_box { width: 90%; min-height: 5rem; background-color: #fff; border-top-left-radius: 1rem; border-top-right-radius: 1rem; margin: auto; } .img_fluid { width: 100%; border-radius: 1rem; } .title_container { background-color: rgb(210, 2, 72); padding-top: 2rem; } .content_container { width: 90%; margin: auto; background-color: #fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; padding: 0 2rem; padding-bottom: 2rem; } .btn { padding: 1rem; color: #fff; background-color: #1E39D1; font-size: 1rem; border-radius: 0.5rem; width: 6rem; text-align: center; } .text_container { padding: 1rem 0rem; text-align: start; margin: auto; } .title_Wrapper { width: 90%; margin: auto; } </style> </head> <body> <div class='main_container'> <div class='title_container'> <div class='title_wrapper'> <h1 align='center'>Campaign Management</h1> <div class='logo'> <img class='img_fluid' src='https://campaign-management-frontend.vercel.app/assets/images/logo1.png' alt='campaign_management'> </div> <div class='white_box'> </div> </div> </div> <div class='content_container'> <h2>Hi " + user.name + " !</h2> <div class='text_container'> <h2>Your account has been deleted by Admin</h2> <p>Contact admin for any queries...</p> </div> <a href='https://campaign-management-frontend.vercel.app'> <div class='btn'> Visit site </div> </a> </div> </div> </body> </html>";
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("fromAddress", fromAddress);
+            obj.put("toAddress", toAddress);
+            obj.put("senderName", senderName);
+            obj.put("subject", subject);
+            obj.put("content", content);
+            userServiceImpl.sendMailer(obj);
+        } catch ( Exception e) {
+            e.printStackTrace();
+        }
+        return userService.deleteData(id);
     }
 
-    @GetMapping("/send-mail")
-    public Boolean sendMail() {
-        sendMail();
-        return true;
+    /* SEND EMAIL bt sendgrid */
+    @PostMapping("/send-mail")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> sendNewMail(@RequestBody EmailModel mailData) throws IOException, JSONException {
+
+        JSONObject emailObj = new JSONObject();
+
+        emailObj.put("toAddress", mailData.getToAddress());
+        emailObj.put("subject", mailData.getSubject());
+        emailObj.put("content", mailData.getContent());
+        emailObj.put("senderName", mailData.getSenderName());
+
+        Boolean status = MailService.sendMail(emailObj,sendGridConfig.getSendGridAPIKey());
+        
+        if (status == true) {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(true, "Email Sent Sucessfully"),
+                    HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(userServiceImpl.returnJsonString(false, "Unable to send email to this address"),
+                    HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
+    // invalid exception
     @GetMapping("/invalid")
-    public String invalid() {
+    public String invalid() throws JSONException {
         log.info("executing invalid");
-        return "{'message', 'SOMETHING WENT WRONG'}";
+        return userServiceImpl.returnJsonString(false, "Somthing went wrong");
     }
 
 }
