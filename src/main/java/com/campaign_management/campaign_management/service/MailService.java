@@ -17,28 +17,27 @@ public class MailService {
 //	Sending mail using sendGrid	
 	public static Boolean sendMail(JSONObject mailData,String apiKey) throws IOException, JSONException {
     	  
-  		Email from = new Email("balajisr2021@srishakthi.ac.in");
-
+//  		Email from = new Email("balajisr2021@srishakthi.ac.in");
+		Email from = new Email("balaji@codingmart.com");
         String subject = mailData.get("subject").toString();
         Email to = new Email(mailData.get("toAddress").toString());
         String bodyContent = mailData.get("content").toString();
         Content content = new Content("text/html",bodyContent);
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid(System.getenv(apiKey));
-        
-        System.out.println("EMAIL ___");
-        System.out.println(System.getenv("SENDGRID_API_KEY"));
+        SendGrid sg = new SendGrid(apiKey);
         
         Request request = new Request();
   		Request batchRequest = new Request();
-  		
+
+        String header = "Bearer "+apiKey;
+        
   		batchRequest.setMethod(Method.POST);
 		batchRequest.setEndpoint("mail/batch");
 		batchRequest.addHeader("Content-type", "application/json");
-		batchRequest.addHeader("Authorization", "Bearer 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");
+		batchRequest.addHeader("Authorization", header);
 		Response batchResponse = sg.api(batchRequest);
-
+		
 		System.out.println(batchResponse.getStatusCode());
 		System.out.println(batchResponse.getBody());
 		
@@ -49,11 +48,14 @@ public class MailService {
 		request.setEndpoint("mail/send");
 
         request.setBody(mail.build());
-
 		request.addHeader("Content-type", "application/json");
-		request.addHeader("Authorization", "Bearer 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");
+		request.addHeader("Authorization", header);
 		
         Response response = sg.api(request);
+
+		System.out.println(request.getHeaders());
+		System.out.println(request.getBody());
+        System.out.println(response.getStatusCode());
         
 		if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) 
 			return true;
