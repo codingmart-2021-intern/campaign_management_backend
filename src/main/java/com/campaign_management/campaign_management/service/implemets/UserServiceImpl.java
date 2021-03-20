@@ -218,8 +218,8 @@ public class UserServiceImpl implements UserService {
         String fromAddress = "campaignmanagement.noreply@gmail.com";
         String senderName = "Campaign Management";
         String subject = "Otp for Forgot password";
-        String content = "Dear user,<br>" + "Please take the below otp for change new password <br>" + otp + "<br>"
-                + "Thank you";
+        String content = "<body style='text-align:center'> <h1>Dear user,</h1><br>" + "<p>Please take the below otp for change new password</p> <br> <h2>" + otp + "</h2><br>"
+                + "<h5>Thank you</h5>";
 
         JSONObject obj = new JSONObject();
         obj.put("fromAddress", fromAddress);
